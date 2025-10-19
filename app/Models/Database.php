@@ -66,6 +66,8 @@ class Database extends Model implements HasCurrentTenantLabel
         ];
     }
 
+    protected $recordTitleAttribute = 'alias';
+
     public function users()
     {
         return $this->belongsToMany(User::class, 'database_user');
