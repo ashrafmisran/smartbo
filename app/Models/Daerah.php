@@ -12,10 +12,10 @@ class Daerah extends Model
     protected $primaryKey = 'REC_ID';
 
     protected $fillable = [
-        'kod_negeri',
-        'kod_parlimen',
-        'kod_dun',
-        'kod_daerah',
-        'nama_daerah',
+        'Kod_Negeri',
+        'Kod_Parlimen',
+        'Kod_DUN',
+        'Kod_Daerah',
+        'Nama_Daerah',
     ];
 }

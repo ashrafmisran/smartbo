@@ -12,8 +12,11 @@ class Lokaliti extends Model
     protected $primaryKey = 'REC_ID';
 
     protected $fillable = [
-        'kod_lokaliti',
-        'nama_lokaliti',
-        'kod_dun',
+        'Kod_Lokaliti',
+        'Nama_Lokaliti',
+        'Kod_DUN',
+        'Kod_Daerah',
+        'Kod_Negeri',
+        'Kod_Parlimen',
     ];
 }

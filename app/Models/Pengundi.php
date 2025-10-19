@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Pengundi extends Model
 {
@@ -64,26 +66,43 @@ class Pengundi extends Model
         return $this->belongsTo(Dun::class, 'Kod_DUN', 'Kod_DUN');
     }
 
-    public function daerah()
+    /**
+     * Get the daerah record based on composite key matching (DUN + Daerah)
+     */
+    public function getDaerah()
     {
-        return $this->belongsTo(Daerah::class, 'Kod_Daerah', 'Kod_Daerah')
-            ->where('Kod_DUN', $this->Kod_DUN);
+        return Daerah::where('Kod_DUN', str_pad($this->Kod_DUN, 2, '0', STR_PAD_LEFT))
+            ->where('Kod_Daerah', str_pad($this->Kod_Daerah, 2, '0', STR_PAD_LEFT))
+            ->first();
+    }
+    
+    /**
+     * Accessor for getting daerah name
+     */
+    public function getNamaDaerahAttribute()
+    {
+        $daerah = $this->getDaerah();
+        return $daerah ? $daerah->Nama_Daerah : null;
     }
 
-    public function lokaliti()
+    /**
+     * Get the lokaliti record based on composite key matching
+     */
+    public function getLokaliti()
     {
-        return $this->belongsTo(Lokaliti::class, 'Kod_Lokaliti', 'Kod_Lokaliti')
-            ->where('Kod_DUN', $this->Kod_DUN)
-            ->where('Kod_Daerah', $this->Kod_Daerah);
+        return Lokaliti::where('Kod_DUN', str_pad($this->Kod_DUN, 2, '0', STR_PAD_LEFT))
+            ->where('Kod_Daerah', str_pad($this->Kod_Daerah, 2, '0', STR_PAD_LEFT))
+            ->where('Kod_Lokaliti', str_pad($this->Kod_Lokaliti, 3, '0', STR_PAD_LEFT))
+            ->first();
     }
-
-    public function scopeWithLokaliti($query)
+    
+    /**
+     * Accessor for getting lokaliti name
+     */
+    public function getNamaLokalitaAttribute()
     {
-        return $query->join('lokaliti', function ($join) {
-            $join->on('lokaliti.Kod_Lokaliti', '=', 'daftara.Kod_Lokaliti')
-                ->on('lokaliti.Kod_Daerah',   '=', 'daftara.Kod_Daerah')
-                ->on('lokaliti.Kod_DUN',      '=', 'daftara.Kod_DUN');
-        })->addSelect('daftara.*', 'lokaliti.Nama as Nama_Lokaliti');
+        $lokaliti = $this->getLokaliti();
+        return $lokaliti ? $lokaliti->Nama_Lokaliti : null;
     }
 
 }
