@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Databases;
 
+use App\Filament\Resources\BaseResource;
 use App\Filament\Resources\Databases\Pages\CreateDatabase;
 use App\Filament\Resources\Databases\Pages\EditDatabase;
 use App\Filament\Resources\Databases\Pages\ListDatabases;
@@ -11,12 +12,11 @@ use App\Filament\Resources\Databases\Schemas\DatabaseInfolist;
 use App\Filament\Resources\Databases\Tables\DatabasesTable;
 use App\Models\Database;
 use BackedEnum;
-use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 
-class DatabaseResource extends Resource
+class DatabaseResource extends BaseResource
 {
     protected static ?string $model = Database::class;
 

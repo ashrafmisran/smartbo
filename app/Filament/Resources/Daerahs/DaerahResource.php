@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Daerahs;
 
+use App\Filament\Resources\BaseResource;
 use App\Filament\Resources\Daerahs\Pages\CreateDaerah;
 use App\Filament\Resources\Daerahs\Pages\EditDaerah;
 use App\Filament\Resources\Daerahs\Pages\ListDaerahs;
@@ -11,12 +12,11 @@ use App\Filament\Resources\Daerahs\Schemas\DaerahInfolist;
 use App\Filament\Resources\Daerahs\Tables\DaerahsTable;
 use App\Models\Daerah;
 use BackedEnum;
-use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 
-class DaerahResource extends Resource
+class DaerahResource extends BaseResource
 {
     protected static ?string $model = Daerah::class;
 

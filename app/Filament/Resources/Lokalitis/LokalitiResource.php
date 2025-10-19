@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Lokalitis;
 
+use App\Filament\Resources\BaseResource;
 use App\Filament\Resources\Lokalitis\Pages\CreateLokaliti;
 use App\Filament\Resources\Lokalitis\Pages\EditLokaliti;
 use App\Filament\Resources\Lokalitis\Pages\ListLokalitis;
@@ -11,12 +12,11 @@ use App\Filament\Resources\Lokalitis\Schemas\LokalitiInfolist;
 use App\Filament\Resources\Lokalitis\Tables\LokalitisTable;
 use App\Models\Lokaliti;
 use BackedEnum;
-use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 
-class LokalitiResource extends Resource
+class LokalitiResource extends BaseResource
 {
     protected static ?string $model = Lokaliti::class;
 

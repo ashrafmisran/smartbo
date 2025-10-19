@@ -2,12 +2,11 @@
 
 namespace App\Filament\Resources\Daerahs\Tables;
 
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\EditAction;
-use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\Summarizers\Count;
+use Filament\Tables\Columns\Summarizers\Summarizer;
 use Filament\Tables\Table;
+use Illuminate\Database\Query\Builder;
 
 class DaerahsTable
 {
@@ -15,29 +14,43 @@ class DaerahsTable
     {
         return $table
             ->columns([
-                TextColumn::make('Kod_Negeri')
+                TextColumn::make('negeri.Nama_Negeri')
+                    ->label('Negeri')
                     ->searchable(),
-                TextColumn::make('Kod_Parlimen')
+                TextColumn::make('parlimen.Nama_Parlimen')
+                    ->label('Parlimen')
                     ->searchable(),
-                TextColumn::make('Kod_DUN')
-                    ->label('Kod DUN')
+                TextColumn::make('dun.Nama_DUN')
+                    ->label('DUN')
                     ->searchable(),
                 TextColumn::make('Kod_Daerah')
+                    ->label('Kod')
                     ->searchable(),
                 TextColumn::make('Nama_Daerah')
-                    ->searchable(),
+                    ->label('Nama Daerah')
+                    ->searchable()
+                    ->summarize(Count::make()->label('Jumlah Daerah')),
+                TextColumn::make('lokalitis_count')
+                    ->label('Bil. Lokaliti')
+                    ->badge()
+                    ->searchable(false)
+                    ->summarize(
+                        Summarizer::make()
+                            ->label('Jumlah Lokaliti')
+                            ->using(fn (Builder $query) => \App\Models\Lokaliti::count())
+                    ),
+                TextColumn::make('pengundi_count')
+                    ->label('Bil. Pengundi')
+                    ->badge()
+                    ->searchable(false)
+                    ->summarize(
+                        Summarizer::make()
+                            ->label('Jumlah Pengundi')
+                            ->using(fn (Builder $query) => \App\Models\Pengundi::count())
+                    ),
             ])
             ->filters([
                 //
-            ])
-            ->recordActions([
-                ViewAction::make(),
-                EditAction::make(),
-            ])
-            ->toolbarActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                ]),
             ]);
     }
 }

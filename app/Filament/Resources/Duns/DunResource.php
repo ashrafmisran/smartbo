@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Duns;
 
+use App\Filament\Resources\BaseResource;
 use App\Filament\Resources\Duns\Pages\CreateDun;
 use App\Filament\Resources\Duns\Pages\EditDun;
 use App\Filament\Resources\Duns\Pages\ListDuns;
@@ -11,12 +12,11 @@ use App\Filament\Resources\Duns\Schemas\DunInfolist;
 use App\Filament\Resources\Duns\Tables\DunsTable;
 use App\Models\Dun;
 use BackedEnum;
-use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 
-class DunResource extends Resource
+class DunResource extends BaseResource
 {
     protected static ?string $model = Dun::class;
 

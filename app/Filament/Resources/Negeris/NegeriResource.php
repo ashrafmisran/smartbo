@@ -2,21 +2,25 @@
 
 namespace App\Filament\Resources\Negeris;
 
+use App\Filament\Resources\BaseResource;
 use App\Filament\Resources\Negeris\Pages\CreateNegeri;
 use App\Filament\Resources\Negeris\Pages\EditNegeri;
 use App\Filament\Resources\Negeris\Pages\ListNegeris;
 use App\Filament\Resources\Negeris\Pages\ViewNegeri;
+use App\Filament\Resources\Negeris\Pages\PaparNegeri;
+use App\Filament\Resources\Negeris\Pages\TambahNegeri;
+use App\Filament\Resources\Negeris\Pages\PindaNegeri;
+use App\Filament\Resources\Negeris\Pages;
 use App\Filament\Resources\Negeris\Schemas\NegeriForm;
 use App\Filament\Resources\Negeris\Schemas\NegeriInfolist;
 use App\Filament\Resources\Negeris\Tables\NegerisTable;
 use App\Models\Negeri;
 use BackedEnum;
-use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 
-class NegeriResource extends Resource
+class NegeriResource extends BaseResource
 {
     protected static ?string $model = Negeri::class;
 
@@ -53,9 +57,9 @@ class NegeriResource extends Resource
     {
         return [
             'index' => ListNegeris::route('/'),
-            'create' => CreateNegeri::route('/create'),
-            'view' => ViewNegeri::route('/{record}'),
-            'edit' => EditNegeri::route('/{record}/edit'),
+            'create' => TambahNegeri::route('/tambah'),
+            'view' => Pages\PaparNegeri::route('/{record}/papar'),
+            'edit' => PindaNegeri::route('/{record}/pinda'),
         ];
     }
 }

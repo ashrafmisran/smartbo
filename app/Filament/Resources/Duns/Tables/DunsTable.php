@@ -2,12 +2,11 @@
 
 namespace App\Filament\Resources\Duns\Tables;
 
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\EditAction;
-use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\Summarizers\Count;
+use Filament\Tables\Columns\Summarizers\Summarizer;
 use Filament\Tables\Table;
+use Illuminate\Database\Query\Builder;
 
 class DunsTable
 {
@@ -15,27 +14,49 @@ class DunsTable
     {
         return $table
             ->columns([
-                TextColumn::make('Kod_Negeri')
+                TextColumn::make('negeri.Nama_Negeri')
+                    ->label('Negeri')
                     ->searchable(),
-                TextColumn::make('Kod_Parlimen')
+                TextColumn::make('parlimen.Nama_Parlimen')
+                    ->label('Parlimen')
                     ->searchable(),
                 TextColumn::make('Kod_DUN')
-                    ->label('Kod DUN')
+                    ->label('Kod')
                     ->searchable(),
                 TextColumn::make('Nama_DUN')
                     ->label('Nama DUN')
-                    ->searchable(),
+                    ->searchable()
+                    ->summarize(Count::make()->label('Jumlah DUN')),
+                TextColumn::make('daerahs_count')
+                    ->label('Bil. Daerah')
+                    ->badge()
+                    ->searchable(false)
+                    ->summarize(
+                        Summarizer::make()
+                            ->label('Jumlah Daerah')
+                            ->using(fn (Builder $query) => \App\Models\Daerah::count())
+                    ),
+                TextColumn::make('lokalitis_count')
+                    ->label('Bil. Lokaliti')
+                    ->badge()
+                    ->searchable(false)
+                    ->summarize(
+                        Summarizer::make()
+                            ->label('Jumlah Lokaliti')
+                            ->using(fn (Builder $query) => \App\Models\Lokaliti::count())
+                    ),
+                TextColumn::make('pengundis_count')
+                    ->label('Bil. Pengundi')
+                    ->badge()
+                    ->searchable(false)
+                    ->summarize(
+                        Summarizer::make()
+                            ->label('Jumlah Pengundi')
+                            ->using(fn (Builder $query) => \App\Models\Pengundi::count())
+                    ),
             ])
             ->filters([
                 //
-            ])
-            ->recordActions([
-                //
-            ])
-            ->toolbarActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                ]),
             ]);
     }
 }

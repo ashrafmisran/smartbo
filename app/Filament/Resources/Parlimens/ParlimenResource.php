@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Parlimens;
 
+use App\Filament\Resources\BaseResource;
 use App\Filament\Resources\Parlimens\Pages\CreateParlimen;
 use App\Filament\Resources\Parlimens\Pages\EditParlimen;
 use App\Filament\Resources\Parlimens\Pages\ListParlimens;
@@ -11,12 +12,11 @@ use App\Filament\Resources\Parlimens\Schemas\ParlimenInfolist;
 use App\Filament\Resources\Parlimens\Tables\ParlimensTable;
 use App\Models\Parlimen;
 use BackedEnum;
-use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 
-class ParlimenResource extends Resource
+class ParlimenResource extends BaseResource
 {
     protected static ?string $model = Parlimen::class;
 

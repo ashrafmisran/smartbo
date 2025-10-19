@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Pengundis;
 
+use App\Filament\Resources\BaseResource;
 use App\Filament\Resources\Pengundis\Pages\CreatePengundi;
 use App\Filament\Resources\Pengundis\Pages\EditPengundi;
 use App\Filament\Resources\Pengundis\Pages\ListPengundis;
@@ -11,12 +12,11 @@ use App\Filament\Resources\Pengundis\Schemas\PengundiInfolist;
 use App\Filament\Resources\Pengundis\Tables\PengundisTable;
 use App\Models\Pengundi;
 use BackedEnum;
-use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 
-class PengundiResource extends Resource
+class PengundiResource extends BaseResource
 {
     protected static ?string $model = Pengundi::class;
 
