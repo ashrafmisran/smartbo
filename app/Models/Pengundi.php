@@ -48,4 +48,42 @@ class Pengundi extends Model
     {
         return $this->getAttribute('No_KP_Baru');
     }
+    
+    public function negeri()
+    {
+        return $this->belongsTo(Negeri::class, 'Kod_Negeri', 'Kod_Negeri');
+    }
+
+    public function parlimen()
+    {
+        return $this->belongsTo(Parlimen::class, 'Kod_Parlimen', 'Kod_Parlimen');
+    }
+
+    public function dun()
+    {
+        return $this->belongsTo(Dun::class, 'Kod_DUN', 'Kod_DUN');
+    }
+
+    public function daerah()
+    {
+        return $this->belongsTo(Daerah::class, 'Kod_Daerah', 'Kod_Daerah')
+            ->where('Kod_DUN', $this->Kod_DUN);
+    }
+
+    public function lokaliti()
+    {
+        return $this->belongsTo(Lokaliti::class, 'Kod_Lokaliti', 'Kod_Lokaliti')
+            ->where('Kod_DUN', $this->Kod_DUN)
+            ->where('Kod_Daerah', $this->Kod_Daerah);
+    }
+
+    public function scopeWithLokaliti($query)
+    {
+        return $query->join('lokaliti', function ($join) {
+            $join->on('lokaliti.Kod_Lokaliti', '=', 'daftara.Kod_Lokaliti')
+                ->on('lokaliti.Kod_Daerah',   '=', 'daftara.Kod_Daerah')
+                ->on('lokaliti.Kod_DUN',      '=', 'daftara.Kod_DUN');
+        })->addSelect('daftara.*', 'lokaliti.Nama as Nama_Lokaliti');
+    }
+
 }

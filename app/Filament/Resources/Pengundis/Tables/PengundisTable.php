@@ -15,16 +15,11 @@ class PengundisTable
     {
         return $table
             ->columns([
-                TextColumn::make('Kod_Negeri')
+                TextColumn::make('dun.Nama_DUN')
                     ->searchable(),
-                TextColumn::make('Kod_Parlimen')
+                TextColumn::make('daerah.Nama_Daerah')
                     ->searchable(),
-                TextColumn::make('Kod_DUN')
-                    ->searchable(),
-                TextColumn::make('Kod_Daerah')
-                    ->searchable(),
-                TextColumn::make('Kod_Lokaliti')
-                    ->searchable(),
+                TextColumn::make('lokaliti.Nama_Lokaliti')->label('Lokaliti'),
                 TextColumn::make('No_KP_Baru')
                     ->searchable(),
                 TextColumn::make('Nama')
