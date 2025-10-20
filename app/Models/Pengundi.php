@@ -35,6 +35,30 @@ class Pengundi extends Model
     ];
 
     /**
+     * The columns that are allowed to be selected (due to database permissions)
+     */
+    protected $allowedColumns = [
+        'No_KP_Baru',
+        'Nama',
+        'Kod_Negeri',
+        'Kod_Parlimen', 
+        'Kod_DUN',
+        'Kod_Daerah',
+        'Kod_Lokaliti',
+        'Keturunan',
+        'Bangsa',
+        'Agama',
+    ];
+
+    /**
+     * Override newQuery to always select only allowed columns
+     */
+    public function newQuery()
+    {
+        return parent::newQuery()->select($this->allowedColumns);
+    }
+
+    /**
      * Get the route key for the model.
      * Since there's no primary key, use No_KP_Baru as the route key.
      */

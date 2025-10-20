@@ -29,7 +29,7 @@ class BoPanelProvider extends PanelProvider
             ->id('bo')
             ->path('bo')
             ->login()
-            ->tenant(Database::class, ownershipRelationship: 'databases')
+            //->tenant(Database::class, ownershipRelationship: 'databases')
             ->colors([
                 'primary' => Color::Amber,
             ])
