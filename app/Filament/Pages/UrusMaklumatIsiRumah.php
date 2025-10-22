@@ -6,6 +6,7 @@ use App\Models\Dun;
 use App\Models\Daerah;
 use App\Models\Lokaliti;
 use App\Models\Pengundi;
+use App\Services\FamilyAnalysisService;
 use Filament\Pages\Page;
 use Filament\Forms;
 use Filament\Tables;
@@ -24,11 +25,11 @@ class UrusMaklumatIsiRumah extends Page implements
     use Forms\Concerns\InteractsWithForms;
     use Tables\Concerns\InteractsWithTable;
 
-    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-users';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-home';
     protected static ?string $navigationLabel = 'Urus Maklumat Isi Rumah';
     protected static ?string $title = 'Urus Maklumat Isi Rumah';
 
-    protected string $view = 'filament.pages.random-pengundi';
+    protected string $view = 'filament.pages.urus-maklumat-isi-rumah';
 
     // Properties to bind selected values
     public ?string $dun_id = null;
@@ -37,6 +38,10 @@ class UrusMaklumatIsiRumah extends Page implements
     
     // Flag to control when to show results
     public bool $showResults = false;
+    public bool $showFamilyAnalysis = false;
+    public array $familyGroups = [];
+    public array $familySuggestions = [];
+    public array $aiAnalysisResult = [];
 
     public static function getNavigationGroup(): ?string
     {
@@ -63,7 +68,8 @@ class UrusMaklumatIsiRumah extends Page implements
     protected function getFormSchema(): array
     {
         return [
-            Section::make()
+            Section::make('Filter Maklumat Pengundi')
+                ->description('Pilih DUN, Daerah, dan Lokaliti untuk menganalisis maklumat isi rumah')
                 ->schema([
                     Grid::make()
                         ->schema([
@@ -78,13 +84,14 @@ class UrusMaklumatIsiRumah extends Page implements
                                 ->searchable()
                                 ->preload()
                                 ->live()
-                                ->autoFocus()
+                                ->required()
                                 ->afterStateUpdated(function ($state, callable $set) {
                                     $set('daerah_id', null);
                                     $set('lokaliti_id', null);
                                     $this->showResults = false;
+                                    $this->showFamilyAnalysis = false;
                                 })
-                                ->columnSpan(3),
+                                ->columnSpan(4),
 
                             Select::make('daerah_id')
                                 ->label('Daerah')
@@ -99,13 +106,14 @@ class UrusMaklumatIsiRumah extends Page implements
                                         ->mapWithKeys(fn ($daerah) => [$daerah->Kod_Daerah => "{$daerah->Kod_Daerah} - {$daerah->Nama_Daerah}"])
                                         ->toArray();
                                 })
-                                ->placeholder('Pilih Daerah (Opsional)')
+                                ->placeholder('Pilih Daerah')
                                 ->searchable()
                                 ->required()
                                 ->live()
                                 ->afterStateUpdated(function ($state, callable $set) {
                                     $set('lokaliti_id', null);
                                     $this->showResults = false;
+                                    $this->showFamilyAnalysis = false;
                                 })
                                 ->columnSpan(3),
 
@@ -115,27 +123,24 @@ class UrusMaklumatIsiRumah extends Page implements
                                     $dunId = $get('dun_id');
                                     $daerahId = $get('daerah_id');
                                     
-                                    if (!$dunId) {
+                                    if (!$dunId || !$daerahId) {
                                         return [];
                                     }
                                     
-                                    $query = Lokaliti::where('Kod_DUN', $dunId);
-                                    
-                                    if ($daerahId) {
-                                        $query->where('Kod_Daerah', $daerahId);
-                                    }
-                                    
-                                    return $query->orderBy('Kod_Lokaliti')
+                                    return Lokaliti::where('Kod_DUN', $dunId)
+                                        ->where('Kod_Daerah', $daerahId)
+                                        ->orderBy('Kod_Lokaliti')
                                         ->get()
                                         ->mapWithKeys(fn ($lokaliti) => [$lokaliti->Kod_Lokaliti => "{$lokaliti->Kod_Lokaliti} - {$lokaliti->Nama_Lokaliti}"])
                                         ->toArray();
                                 })
-                                ->placeholder('Pilih Lokaliti (Opsional)')
+                                ->placeholder('Pilih Lokaliti')
                                 ->searchable()
                                 ->required()
                                 ->live()
                                 ->afterStateUpdated(function () {
                                     $this->showResults = false;
+                                    $this->showFamilyAnalysis = false;
                                 })
                                 ->columnSpan(3),
 
@@ -145,12 +150,28 @@ class UrusMaklumatIsiRumah extends Page implements
                                         ->icon('heroicon-o-arrow-right-circle')
                                         ->color('success')
                                         ->iconButton()
-                                        ->label('Jana')
+                                        ->label('Papar')
                                         ->size('lg')
-                                        ->visible(fn () => $this->dun_id !== null)
-                                        ->action(function () {
+                                        ->visible(fn (callable $get) => $get('dun_id') && $get('daerah_id') && $get('lokaliti_id'))
+                                        ->action(function (callable $get) {
+                                            $this->dun_id = $get('dun_id');
+                                            $this->daerah_id = $get('daerah_id');
+                                            $this->lokaliti_id = $get('lokaliti_id');
                                             $this->showResults = true;
+                                            $this->showFamilyAnalysis = false;
+                                            
+                                            // Reset analysis data
+                                            $this->familyGroups = [];
+                                            $this->familySuggestions = [];
+                                            $this->aiAnalysisResult = [];
+                                            
                                             $this->resetTable();
+                                            
+                                            Notification::make()
+                                                ->success()
+                                                ->title('Maklumat Isi Rumah Dipaparkan')
+                                                ->body('Menunjukkan pengundi berdasarkan DUN, Daerah, dan Lokaliti yang dipilih')
+                                                ->send();
                                         }),
                                 ])
                                 ->columnSpan(1)
@@ -164,47 +185,165 @@ class UrusMaklumatIsiRumah extends Page implements
     // Table query
     protected function getTableQuery(): \Illuminate\Database\Eloquent\Builder
     {
-        $query = Pengundi::query(); // Now automatically selects only allowed columns
+        $query = Pengundi::query();
         
-        // Only show results if generate button was clicked
-        if (!$this->showResults || !$this->dun_id) {
+        // Only show results if all required filters are selected
+        if (!$this->showResults || !$this->dun_id || !$this->daerah_id || !$this->lokaliti_id) {
             return $query->whereRaw('1 = 0'); // Return empty result
         }
         
-        // Filter by DUN (required) - pad with leading zeros
+        // Filter by DUN, Daerah, and Lokaliti - pad with leading zeros
         $paddedDunId = $this->padDunCode($this->dun_id);
-        $query->where('Kod_DUN', $paddedDunId);
+        $paddedDaerahId = $this->padDaerahCode($this->daerah_id);
+        $paddedLokalitiId = $this->padLokalitiCode($this->lokaliti_id);
         
-        // Filter by Daerah if selected - pad with leading zeros
-        if ($this->daerah_id) {
-            $paddedDaerahId = $this->padDaerahCode($this->daerah_id);
-            $query->where('Kod_Daerah', $paddedDaerahId);
+        $query->where('Kod_DUN', $paddedDunId)
+              ->where('Kod_Daerah', $paddedDaerahId)
+              ->where('Kod_Lokaliti', $paddedLokalitiId);
+        
+        return $query->orderBy('Nama');
+    }
+
+    // Basic Family Analysis Method
+    private function analyzeFamilyRelationships($pengundis)
+    {
+        $this->familyGroups = [];
+        $this->familySuggestions = [];
+        
+        if (empty($pengundis)) {
+            return;
         }
         
-        // Filter by Lokaliti if selected - pad with leading zeros
-        if ($this->lokaliti_id) {
-            $paddedLokalitiId = $this->padLokalitiCode($this->lokaliti_id);
-            $query->where('Kod_Lokaliti', $paddedLokalitiId);
+        // Simple family grouping by similar names and addresses
+        $groupId = 1;
+        $processed = [];
+        
+        foreach ($pengundis as $index => $pengundi) {
+            if (in_array($index, $processed)) {
+                continue;
+            }
+            
+            $familyMembers = [$pengundi];
+            $processed[] = $index;
+            
+            // Find potential family members
+            foreach ($pengundis as $otherIndex => $otherPengundi) {
+                if ($index === $otherIndex || in_array($otherIndex, $processed)) {
+                    continue;
+                }
+                
+                // Check for similar surnames (last word in name)
+                $name1Parts = explode(' ', trim($pengundi['Nama'] ?? ''));
+                $name2Parts = explode(' ', trim($otherPengundi['Nama'] ?? ''));
+                
+                if (count($name1Parts) > 1 && count($name2Parts) > 1) {
+                    $surname1 = end($name1Parts);
+                    $surname2 = end($name2Parts);
+                    
+                    // Check for similar surnames or bin/binti relationships
+                    $isSimilarSurname = strtolower($surname1) === strtolower($surname2);
+                    $isBinBinti = $this->checkBinBintiRelation($pengundi['Nama'] ?? '', $otherPengundi['Nama'] ?? '');
+                    $isSimilarAddress = $this->checkSimilarAddress($pengundi, $otherPengundi);
+                    
+                    if ($isSimilarSurname || $isBinBinti || $isSimilarAddress) {
+                        $familyMembers[] = $otherPengundi;
+                        $processed[] = $otherIndex;
+                    }
+                }
+            }
+            
+            // Only create groups with more than 1 member
+            if (count($familyMembers) > 1) {
+                $this->familyGroups[] = [
+                    'group_id' => $groupId,
+                    'name' => "Keluarga {$groupId}",
+                    'members' => array_map(function($member) {
+                        return [
+                            'name' => $member['Nama'] ?? '',
+                            'no_kp' => $member['No_KP_Baru'] ?? '',
+                            'relationship' => $this->guessRelationship($member)
+                        ];
+                    }, $familyMembers),
+                    'confidence' => $this->calculateGroupConfidence($familyMembers)
+                ];
+                $groupId++;
+            }
         }
         
-        // Debug logging to verify the padded values
-        \Log::info('RandomPengundi Query Debug', [
-            'original_dun_id' => $this->dun_id,
-            'padded_dun_id' => $paddedDunId,
-            'original_daerah_id' => $this->daerah_id,
-            'padded_daerah_id' => $this->daerah_id ? $this->padDaerahCode($this->daerah_id) : null,
-            'original_lokaliti_id' => $this->lokaliti_id,
-            'padded_lokaliti_id' => $this->lokaliti_id ? $this->padLokalitiCode($this->lokaliti_id) : null,
-        ]);
+        $this->showFamilyAnalysis = true;
+    }
+    
+    private function checkBinBintiRelation($name1, $name2): bool
+    {
+        $name1Lower = strtolower($name1);
+        $name2Lower = strtolower($name2);
         
-        $result = $query;
+        // Extract father's name from bin/binti pattern
+        if (strpos($name1Lower, ' bin ') !== false) {
+            $fatherName1 = trim(substr($name1Lower, strpos($name1Lower, ' bin ') + 5));
+            if (strpos($name2Lower, $fatherName1) !== false) {
+                return true;
+            }
+        }
         
-        // Debug: Log the final count and query
-        \Log::info('Final Query Count: ' . $result->count());
-        \Log::info('SQL Query: ' . $result->toSql());
-        \Log::info('Query Bindings: ', $result->getBindings());
+        if (strpos($name1Lower, ' binti ') !== false) {
+            $fatherName1 = trim(substr($name1Lower, strpos($name1Lower, ' binti ') + 7));
+            if (strpos($name2Lower, $fatherName1) !== false) {
+                return true;
+            }
+        }
         
-        return $result;
+        return false;
+    }
+    
+    private function checkSimilarAddress($pengundi1, $pengundi2): bool
+    {
+        $addr1 = trim(($pengundi1['Alamat_1'] ?? '') . ' ' . ($pengundi1['Alamat_2'] ?? ''));
+        $addr2 = trim(($pengundi2['Alamat_1'] ?? '') . ' ' . ($pengundi2['Alamat_2'] ?? ''));
+        
+        if (empty($addr1) || empty($addr2)) {
+            return false;
+        }
+        
+        // Simple similarity check - same first part of address
+        $addr1Words = explode(' ', strtolower($addr1));
+        $addr2Words = explode(' ', strtolower($addr2));
+        
+        if (count($addr1Words) > 2 && count($addr2Words) > 2) {
+            $common = array_intersect(array_slice($addr1Words, 0, 3), array_slice($addr2Words, 0, 3));
+            return count($common) >= 2;
+        }
+        
+        return false;
+    }
+    
+    private function guessRelationship($member): string
+    {
+        $name = strtolower($member['Nama'] ?? '');
+        
+        if (strpos($name, ' bin ') !== false) {
+            return 'Anak lelaki';
+        } elseif (strpos($name, ' binti ') !== false) {
+            return 'Anak perempuan';
+        } else {
+            return 'Ahli keluarga';
+        }
+    }
+    
+    private function calculateGroupConfidence($members): int
+    {
+        // Simple confidence based on group size and name patterns
+        $baseConfidence = count($members) > 2 ? 70 : 60;
+        
+        foreach ($members as $member) {
+            $name = strtolower($member['Nama'] ?? '');
+            if (strpos($name, ' bin ') !== false || strpos($name, ' binti ') !== false) {
+                $baseConfidence += 10;
+                break;
+            }
+        }
+        
+        return min($baseConfidence, 95);
     }
 
     // Table columns
@@ -217,89 +356,201 @@ class UrusMaklumatIsiRumah extends Page implements
                 ->sortable()
                 ->copyable()
                 ->copyMessage('No. KP disalin')
-                ->width('150px'),
+                ->width('150px')
+                ->fontFamily('mono')
+                ->description(fn ($record) => $this->getFamilyRelationshipDescription($record)),
 
             TextColumn::make('Nama')
                 ->label('Nama Pengundi')
                 ->searchable()
                 ->sortable()
                 ->weight('bold')
+                ->wrap()
                 ->description(fn ($record) => $record->Keturunan ? "Keturunan: {$record->Keturunan}" : null),
 
-            TextColumn::make('Kod_DUN')
-                ->label('DUN')
+            TextColumn::make('family_group')
+                ->label('Kumpulan Keluarga')
                 ->badge()
-                ->color('success')
-                ->formatStateUsing(fn ($state) => $state ? "DUN-{$state}" : '--')
-                ->default('--'),
-
-            TextColumn::make('Kod_Daerah')
-                ->label('Daerah')
-                ->badge()
-                ->color('warning')
-                ->formatStateUsing(fn ($state) => $state ? "Daerah-{$state}" : '--')
-                ->default('--'),
-
-            TextColumn::make('Kod_Lokaliti')
-                ->label('Lokaliti')
-                ->badge()
-                ->color('info')
-                ->formatStateUsing(fn ($state) => $state ? "Lokaliti-{$state}" : '--')
-                ->default('--'),
+                ->color(fn ($record) => $this->getFamilyGroupColor($record))
+                ->formatStateUsing(fn ($state, $record) => $this->getFamilyGroupName($record))
+                ->visible(fn () => $this->showFamilyAnalysis)
+                ->icon(fn ($record) => $this->getFamilyGroupId($record) ? 'heroicon-s-users' : null),
 
             TextColumn::make('Bangsa')
                 ->label('Bangsa')
                 ->badge()
                 ->color('gray')
-                ->default('--'),
+                ->default('--')
+                ->toggleable(),
 
             TextColumn::make('Agama')
                 ->label('Agama')
                 ->badge()
+                ->color('info')
+                ->default('--')
+                ->toggleable(),
+
+            TextColumn::make('Kod_DUN')
+                ->label('DUN')
+                ->badge()
                 ->color('primary')
-                ->default('--'),
+                ->formatStateUsing(fn ($state) => "DUN {$state}")
+                ->toggleable(),
+
+            TextColumn::make('Kod_Daerah')
+                ->label('Daerah')
+                ->badge()
+                ->color('warning')
+                ->formatStateUsing(fn ($state) => "DR {$state}")
+                ->toggleable(),
+
+            TextColumn::make('Kod_Lokaliti')
+                ->label('Lokaliti')
+                ->badge()
+                ->color('success')
+                ->formatStateUsing(fn ($state) => "LK {$state}")
+                ->toggleable(),
         ];
+    }
+
+    private function getFamilyRelationshipDescription($record): ?string
+    {
+        if (!$this->showFamilyAnalysis || empty($this->familyGroups) || !isset($record->No_KP_Baru)) {
+            return null;
+        }
+
+        foreach ($this->familyGroups as $group) {
+            foreach ($group['members'] as $member) {
+                if ($member['no_kp'] === $record->No_KP_Baru) {
+                    return $member['relationship'] ?? 'Ahli Keluarga';
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private function getFamilyGroupColor($record): string
+    {
+        if (!$this->showFamilyAnalysis || !isset($record->No_KP_Baru)) {
+            return 'gray';
+        }
+
+        $groupId = $this->getFamilyGroupId($record);
+        if (!$groupId) {
+            return 'gray';
+        }
+        
+        $colors = ['success', 'warning', 'danger', 'info', 'primary'];
+        
+        return $colors[($groupId - 1) % count($colors)] ?? 'gray';
+    }
+
+    private function getFamilyGroupName($record): string
+    {
+        if (!$this->showFamilyAnalysis || !isset($record->No_KP_Baru)) {
+            return '--';
+        }
+
+        $groupId = $this->getFamilyGroupId($record);
+        return $groupId ? "Keluarga {$groupId}" : 'Tiada Kumpulan';
+    }
+
+    private function getFamilyGroupId($record): ?int
+    {
+        if (!isset($record->No_KP_Baru) || empty($this->familyGroups)) {
+            return null;
+        }
+        
+        foreach ($this->familyGroups as $group) {
+            foreach ($group['members'] as $member) {
+                if ($member['no_kp'] === $record->No_KP_Baru) {
+                    return $group['group_id'];
+                }
+            }
+        }
+        return null;
+    }
+
+    // Disable pagination for family analysis
+    protected function isTablePaginationEnabled(): bool
+    {
+        return false;
     }
 
     // Table empty state
     protected function getTableEmptyStateIcon(): ?string
     {
-        return 'heroicon-o-information-circle';
+        return 'heroicon-o-home';
     }
 
     protected function getTableEmptyStateHeading(): ?string
     {
-        return 'Sila pilih DUN untuk mula';
+        return 'Sila pilih semua filter untuk mula';
     }
 
     protected function getTableEmptyStateDescription(): ?string
     {
-        return 'Pilih DUN dan klik "Jana" untuk melihat 5 pengundi rawak.';
+        return 'Pilih DUN, Daerah, dan Lokaliti untuk melihat maklumat isi rumah.';
     }
 
     // Mount method to initialize form
     public function mount(): void
     {
-        $this->form->fill([]);
+        $this->form->fill([
+            'dun_id' => $this->dun_id,
+            'daerah_id' => $this->daerah_id,
+            'lokaliti_id' => $this->lokaliti_id,
+        ]);
     }
 
     // Page header actions
     protected function getHeaderActions(): array
     {
         return [
-            Action::make('regenerate')
-                ->icon('heroicon-o-arrow-path')
+            Action::make('analyzeInfo')
+                ->icon('heroicon-o-document-magnifying-glass')
                 ->color('info')
-                ->label('Jana Semula')
-                ->visible(fn () => $this->showResults && $this->dun_id)
+                ->label('Analisis Maklumat')
+                ->visible(fn () => $this->showResults)
                 ->action(function () {
-                    $this->resetTable();
+                    $pengundis = $this->getTableQuery()->get()->toArray();
+                    $this->analyzeFamilyRelationships($pengundis);
                     
                     Notification::make()
                         ->success()
-                        ->title('Pengundi rawak dijana semula')
-                        ->body('5 pengundi rawak baharu telah dijana')
+                        ->title('Analisis Maklumat Selesai')
+                        ->body('Pengundi telah dikumpulkan berdasarkan potensi hubungan keluarga')
                         ->send();
+                }),
+            
+            Action::make('analyzeAI')
+                ->icon('heroicon-o-cpu-chip')
+                ->color('warning')
+                ->label('Analisis AI Keluarga')
+                ->visible(fn () => $this->showResults && !empty($this->familyGroups))
+                ->action(function () {
+                    try {
+                        $service = app(FamilyAnalysisService::class);
+                        $pengundi = $this->getTableQuery()->get();
+                        $analysis = $service->analyzeFamilyRelationships($pengundi->toArray());
+                        
+                        Notification::make()
+                            ->success()
+                            ->title('Analisis AI Selesai')
+                            ->body($analysis['summary'] ?? 'Analisis hubungan keluarga telah selesai')
+                            ->send();
+                            
+                        // Optionally store or display the detailed analysis
+                        $this->aiAnalysisResult = $analysis;
+                        
+                    } catch (\Exception $e) {
+                        Notification::make()
+                            ->danger()
+                            ->title('Ralat Analisis AI')
+                            ->body('Tidak dapat melakukan analisis AI: ' . $e->getMessage())
+                            ->send();
+                    }
                 }),
         ];
     }

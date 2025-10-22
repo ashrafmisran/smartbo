@@ -28,6 +28,8 @@ class BoPanelProvider extends PanelProvider
             ->default()
             ->id('bo')
             ->path('bo')
+            ->brandLogo('/storage/img/logo-smartbo.png')
+            ->brandLogoHeight('3rem')
             ->login()
             //->tenant(Database::class, ownershipRelationship: 'databases')
             ->colors([
