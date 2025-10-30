@@ -22,6 +22,7 @@ class DatabaseSeeder extends Seeder
             'name' => 'Muhammad Ashraf bin Misran',
             'email' => 'ashrafmisran@gmail.com',
             'password' => bcrypt(env('DEFAULT_ADMIN_PASSWORD', 'password')),
+            'pas_membership_no' => '1040820',
         ]);
 
         // Seed sample databases

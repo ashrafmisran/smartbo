@@ -90,6 +90,19 @@ class Pengundi extends Model
         return $this->belongsTo(Dun::class, 'Kod_DUN', 'Kod_DUN');
     }
 
+    public function tel_numbers()
+    {
+        // Only include related records that actually have at least one phone number present
+        return $this->hasMany(Bancian::class, 'No_KP_Baru', 'No_KP_Baru')
+            ->where(function ($q) {
+                $q->where(function ($q1) {
+                    $q1->whereNotNull('Tel_Bimbit')->where('Tel_Bimbit', '!=', '');
+                })->orWhere(function ($q2) {
+                    $q2->whereNotNull('Tel_Rumah')->where('Tel_Rumah', '!=', '');
+                });
+            });
+    }
+
     /**
      * Get the daerah record based on composite key matching (DUN + Daerah)
      */
@@ -123,10 +136,42 @@ class Pengundi extends Model
     /**
      * Accessor for getting lokaliti name
      */
-    public function getNamaLokalitaAttribute()
+    public function getNamaLokalitiAttribute()
     {
         $lokaliti = $this->getLokaliti();
         return $lokaliti ? $lokaliti->Nama_Lokaliti : null;
+    }
+
+    /**
+     * Computed list of phone numbers from related Bancian rows (mobile first),
+     * filtered to non-null, non-empty values and de-duplicated.
+     */
+    public function getPhoneNumbersAttribute(): array
+    {
+        $numbers = [];
+
+        foreach ($this->tel_numbers as $rec) {
+            $mobile = trim((string) ($rec->Tel_Bimbit ?? ''));
+            $home = trim((string) ($rec->Tel_Rumah ?? ''));
+
+            if ($mobile !== '') {
+                $numbers[] = $mobile;
+            }
+            if ($home !== '') {
+                $numbers[] = $home;
+            }
+        }
+
+        return array_values(array_unique($numbers));
+    }
+
+    /**
+     * Convenience accessor: preferred/primary phone number (mobile if available, else home).
+     */
+    public function getPrimaryPhoneAttribute(): ?string
+    {
+        $list = $this->phone_numbers;
+        return $list[0] ?? null;
     }
 
 }

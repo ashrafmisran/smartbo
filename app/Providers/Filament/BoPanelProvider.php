@@ -28,12 +28,14 @@ class BoPanelProvider extends PanelProvider
             ->default()
             ->id('bo')
             ->path('bo')
-            ->brandLogo('/storage/img/logo-smartbo.png')
-            ->brandLogoHeight('3rem')
+            ->brandLogo('/storage/img/telecall.png')
+            ->favicon('/storage/img/favicon.png')
+            ->brandLogoHeight('5rem')
+            ->registration(\App\Filament\Pages\Register::class)
             ->login()
             //->tenant(Database::class, ownershipRelationship: 'databases')
             ->colors([
-                'primary' => Color::Amber,
+                'primary' => Color::Blue[950],
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
