@@ -66,7 +66,7 @@ class User extends Authenticatable implements HasTenants
         return $this->databases()->whereKey($tenant)->exists();
     }
 
-    public function canAccessPanel(Panel $panel): bool
+    public function canAccessFilament(): bool
     {
         return true;
     }
