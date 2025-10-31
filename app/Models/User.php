@@ -70,4 +70,9 @@ class User extends Authenticatable implements HasTenants
     {
         return true;
     }
+
+    public function canAccessPanel(Panel $panel): bool
+    {
+        return true;
+    }
 }
