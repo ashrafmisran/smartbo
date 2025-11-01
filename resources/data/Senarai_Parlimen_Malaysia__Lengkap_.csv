@@ -1,0 +1,223 @@
+id,name,negeri
+1,Padang Besar,8
+2,Kangar,8
+3,Arau,8
+4,Langkawi,2
+5,Jerlun,2
+6,Kubang Pasu,2
+7,Padang Terap,2
+8,Pokok Sena,2
+9,Alor Setar,2
+10,Kuala Kedah,2
+11,Pendang,2
+12,Jerai,2
+13,Sik,2
+14,Merbok,2
+15,Sungai Petani,2
+16,Baling,2
+17,Padang Serai,2
+18,Kulim-Bandar Baharu,2
+19,Tumpat,3
+20,Pengkalan Chepa,3
+21,Kota Bharu,3
+22,Pasir Mas,3
+23,Rantau Panjang,3
+24,Kubang Kerian,3
+25,Bachok,3
+26,Ketereh,3
+27,Tanah Merah,3
+28,Pasir Puteh,3
+29,Machang,3
+30,Jeli,3
+31,Kuala Krai,3
+32,Gua Musang,3
+33,Besut,11
+34,Setiu,11
+35,Kuala Nerus,11
+36,Kuala Terengganu,11
+37,Marang,11
+38,Hulu Terengganu,11
+39,Dungun,11
+40,Kemaman,11
+41,Kepala Batas,9
+42,Tasek Gelugor,9
+43,Bagan,9
+44,Permatang Pauh,9
+45,Bukit Mertajam,9
+46,Batu Kawan,9
+47,Nibong Tebal,9
+48,Bukit Bendera,9
+49,Tanjong,9
+50,Jelutong,9
+51,Bukit Gelugor,9
+52,Bayan Baru,9
+53,Balik Pulau,9
+54,Gerik,7
+55,Lenggong,7
+56,Larut,7
+57,Parit Buntar,7
+58,Bagan Serai,7
+59,Bukit Gantang,7
+60,Taiping,7
+61,Padang Rengas,7
+62,Sungai Siput,7
+63,Tambun,7
+64,Ipoh Timor,7
+65,Ipoh Barat,7
+66,Batu Gajah,7
+67,Kuala Kangsar,7
+68,Beruas,7
+69,Parit,7
+70,Kampar,7
+71,Gopeng,7
+72,Tapah,7
+73,Pasir Salak,7
+74,Lumut,7
+75,Bagan Datuk,7
+76,Teluk Intan,7
+77,Tanjung Malim,7
+78,Cameron Highlands,6
+79,Lipis,6
+80,Raub,6
+81,Jerantut,6
+82,Indera Mahkota,6
+83,Kuantan,6
+84,Paya Besar,6
+85,Pekan,6
+86,Maran,6
+87,Kuala Krau,6
+88,Temerloh,6
+89,Bentong,6
+90,Bera,6
+91,Rompin,6
+92,Sabak Bernam,10
+93,Sungai Besar,10
+94,Hulu Selangor,10
+95,Tanjong Karang,10
+96,Kuala Selangor,10
+97,Selayang,10
+98,Gombak,10
+99,Ampang,10
+100,Pandan,10
+101,Hulu Langat,10
+102,Bangi,10
+103,Puchong,10
+104,Subang,10
+105,Petaling Jaya,10
+106,Damansara,10
+107,Sungai Buloh,10
+108,Shah Alam,10
+109,Kapar,10
+110,Klang,10
+111,Kota Raja,10
+112,Kuala Langat,10
+113,Sepang,10
+114,Kepong,14
+115,Batu,14
+116,Wangsa Maju,14
+117,Segambut,14
+118,Setiawangsa,14
+119,Titiwangsa,14
+120,Bukit Bintang,14
+121,Lembah Pantai,14
+122,Seputeh,14
+123,Cheras,14
+124,Bandar Tun Razak,14
+125,Putrajaya,14
+126,Jelebu,5
+127,Jempol,5
+128,Seremban,5
+129,Kuala Pilah,5
+130,Rasah,5
+131,Rembau,5
+132,Port Dickson,5
+133,Tampin,5
+134,Masjid Tanah,4
+135,Alor Gajah,4
+136,Tangga Batu,4
+137,Hang Tuah Jaya,4
+138,Kota Melaka,4
+139,Jasin,4
+140,Segamat,1
+141,Sekijang,1
+142,Labis,1
+143,Pagoh,1
+144,Ledang,1
+145,Bakri,1
+146,Muar,1
+147,Parit Sulong,1
+148,Ayer Hitam,1
+149,Sri Gading,1
+150,Batu Pahat,1
+151,Simpang Renggam,1
+152,Kluang,1
+153,Sembrong,1
+154,Mersing,1
+155,Tenggara,1
+156,Kota Tinggi,1
+157,Pengerang,1
+158,Tebrau,1
+159,Pasir Gudang,1
+160,Johor Bahru,1
+161,Pulai,1
+162,Iskandar Puteri,1
+163,Kulai,1
+164,Pontian,1
+165,Tanjung Piai,1
+166,Labuan,14
+167,Kudat,12
+168,Kota Marudu,12
+169,Kota Belud,12
+170,Tuaran,12
+171,Sepanggar,12
+172,Kota Kinabalu,12
+173,Putatan,12
+174,Penampang,12
+175,Papar,12
+176,Kimanis,12
+177,Beaufort,12
+178,Sipitang,12
+179,Ranau,12
+180,Keningau,12
+181,Tenom,12
+182,Pensiangan,12
+183,Beluran,12
+184,Libaran,12
+185,Batu Sapi,12
+186,Sandakan,12
+187,Kinabatangan,12
+188,Lahad Datu,12
+189,Semporna,12
+190,Tawau,12
+191,Kalabakan,12
+192,Mas Gading,13
+193,Santubong,13
+194,Petra Jaya,13
+195,Bandar Kuching,13
+196,Stampin,13
+197,Kota Samarahan,13
+198,Puncak Borneo,13
+199,Serian,13
+200,Batang Sadong,13
+201,Batang Lupar,13
+202,Sri Aman,13
+203,Lubok Antu,13
+204,Betong,13
+205,Saratok,13
+206,Tanjong Manis,13
+207,Igan,13
+208,Sarikei,13
+209,Julau,13
+210,Kanowit,13
+211,Lanang,13
+212,Sibu,13
+213,Mukah,13
+214,Selangau,13
+215,Kapit,13
+216,Hulu Rajang,13
+217,Bintulu,13
+218,Sibuti,13
+219,Miri,13
+220,Baram,13
+221,Limbang,13
+222,Lawas,13

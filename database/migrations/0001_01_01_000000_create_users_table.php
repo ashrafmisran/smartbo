@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('email')->unique();
             $table->string('pas_membership_no')->nullable();
-            $table->foreignId('division_id')->nullable()->constrained('Parlimen', 'REC_ID');
+            $table->foreignId('division')->nullable()->constrained('kawasan', 'id');
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->rememberToken();

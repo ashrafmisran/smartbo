@@ -50,4 +50,9 @@ class UserResource extends BaseResource
             'edit' => EditUser::route('/{record}/edit'),
         ];
     }
+
+    public static function canViewAny(): bool
+    {
+        return auth()->user()->is_admin;
+    }
 }
