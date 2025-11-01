@@ -51,8 +51,8 @@ abstract class BaseResource extends Resource
             $model = static::getModel();
             if (class_exists($model)) {
 
-                return '0';
-                //return (string) $model::count();
+                //return '0';
+                return (string) $model::count();
             }
         }
         return null;
