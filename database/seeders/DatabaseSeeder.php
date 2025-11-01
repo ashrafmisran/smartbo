@@ -20,7 +20,7 @@ class DatabaseSeeder extends Seeder
 
         $this->call(KawasanCsvSeeder::class);
 
-        User::factory()->create([
+        User::create([
             'name' => 'Muhammad Ashraf bin Misran',
             'email' => 'ashrafmisran@gmail.com',
             'password' => bcrypt(env('DEFAULT_ADMIN_PASSWORD', 'password')),
