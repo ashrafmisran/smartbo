@@ -27,6 +27,8 @@ class User extends Authenticatable implements FilamentUser //implements HasTenan
         'name',
         'email',
         'password',
+        'pas_membership_no',
+        'division_id',
     ];
 
     /**
@@ -55,6 +57,11 @@ class User extends Authenticatable implements FilamentUser //implements HasTenan
     public function databases()
     {
         return $this->belongsToMany(Database::class, 'database_user');
+    }
+
+    public function division()
+    {
+        return $this->belongsTo(Parlimen::class, 'division_id', 'REC_ID');
     }
 
     public function getTenants(Panel $panel = null): Collection

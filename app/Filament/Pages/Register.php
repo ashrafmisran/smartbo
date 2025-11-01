@@ -5,6 +5,7 @@ namespace App\Filament\Pages;
 use Filament\Auth\Pages\Register as BaseRegister;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Select;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
@@ -21,6 +22,11 @@ class Register extends BaseRegister
                 ->label('No. Keahlian PAS')
                 ->required()
                 ->maxLength(7),
+              Select::make('division_id')
+                ->label('Kawasan Keahlian PAS')
+                ->relationship('division', 'Nama_Parlimen')
+                ->searchable()
+                ->required(),
               $this->getPasswordFormComponent(),
               $this->getPasswordConfirmationFormComponent(),
             ]);
@@ -36,6 +42,7 @@ class Register extends BaseRegister
           'name' => $data['name'],
           'email' => $data['email'],
           'pas_membership_no' => $data['pas_membership_no'],
+          'division_id' => $data['division_id'],
           'password' => Hash::make($data['password']),
         ]);
         
