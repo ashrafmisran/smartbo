@@ -27,6 +27,8 @@ class UserFactory extends Factory
             'name' => $this->faker->name(),
             'email' => $this->faker->unique()->safeEmail(),
             'email_verified_at' => now(),
+            'pas_membership_no' => $this->faker->numerify('#######'),
+            'division' => \App\Models\Kawasan::inRandomOrder()->first()?->id,
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
         ];
