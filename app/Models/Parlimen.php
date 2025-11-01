@@ -23,6 +23,31 @@ class Parlimen extends Model
         return $this->belongsTo(Negeri::class, 'Kod_Negeri', 'Kod_Negeri');
     }
 
+    // HasMany relationships (composite via whereColumn)
+    public function duns()
+    {
+        return $this->hasMany(Dun::class, 'Kod_Parlimen', 'Kod_Parlimen')
+            ->whereColumn('dun.Kod_Negeri', 'parlimen.Kod_Negeri');
+    }
+
+    public function daerahs()
+    {
+        return $this->hasMany(Daerah::class, 'Kod_Parlimen', 'Kod_Parlimen')
+            ->whereColumn('daerah.Kod_Negeri', 'parlimen.Kod_Negeri');
+    }
+
+    public function lokalitis()
+    {
+        return $this->hasMany(Lokaliti::class, 'Kod_Parlimen', 'Kod_Parlimen')
+            ->whereColumn('lokaliti.Kod_Negeri', 'parlimen.Kod_Negeri');
+    }
+
+    public function pengundis()
+    {
+        return $this->hasMany(Pengundi::class, 'Kod_Parlimen', 'Kod_Parlimen')
+            ->whereColumn('daftara.Kod_Negeri', 'parlimen.Kod_Negeri');
+    }
+
     // Custom methods for relationships
     public function getDuns()
     {
@@ -52,25 +77,25 @@ class Parlimen extends Model
             ->get();
     }
 
-    // Accessors for counts and display
+    // Accessors for counts and display (kept for compatibility if used elsewhere)
     public function getDunsCountAttribute()
     {
-        return $this->getDuns()->count();
+        return $this->relationLoaded('duns') ? $this->duns->count() : $this->getDuns()->count();
     }
 
     public function getDaerahsCountAttribute()
     {
-        return $this->getDaerahs()->count();
+        return $this->relationLoaded('daerahs') ? $this->daerahs->count() : $this->getDaerahs()->count();
     }
 
     public function getLokalitisCountAttribute()
     {
-        return $this->getLokalitis()->count();
+        return $this->relationLoaded('lokalitis') ? $this->lokalitis->count() : $this->getLokalitis()->count();
     }
 
     public function getPengundisCountAttribute()
     {
-        return $this->getPengundis()->count();
+        return $this->relationLoaded('pengundis') ? $this->pengundis->count() : $this->getPengundis()->count();
     }
 
     public function getFullLocationAttribute()

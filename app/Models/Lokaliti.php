@@ -21,6 +21,16 @@ class Lokaliti extends Model
     ];
 
     /**
+     * Eager-load small relations by default to avoid N+1 in listing tables
+     * (we don't eager-load daerah here due to the composite constraint nuance).
+     */
+    protected $with = [
+        'negeri',
+        'parlimen',
+        'dun',
+    ];
+
+    /**
      * Get the negeri that this lokaliti belongs to
      */
     public function negeri()
@@ -46,13 +56,22 @@ class Lokaliti extends Model
 
     /**
      * Get the daerah that this lokaliti belongs to
-     * This uses composite key matching (DUN + Daerah)
+     * Use a belongsTo on Kod_Daerah with an extra where using the current model's Kod_DUN value.
+     * Note: Avoid whereColumn to the parent table alias, since the relation query doesn't join lokaliti.
+     */
+    public function daerah()
+    {
+        return $this->belongsTo(Daerah::class, 'Kod_Daerah', 'Kod_Daerah')
+            ->where('daerah.Kod_DUN', $this->Kod_DUN);
+    }
+
+    /**
+     * Legacy helper used by table rendering; returns a query constrained by this model's keys.
      */
     public function getDaerah()
     {
         return Daerah::where('Kod_DUN', $this->Kod_DUN)
-            ->where('Kod_Daerah', $this->Kod_Daerah)
-            ->first();
+            ->where('Kod_Daerah', $this->Kod_Daerah);
     }
 
     /**
@@ -72,7 +91,7 @@ class Lokaliti extends Model
      */
     public function getNamaDaerahAttribute()
     {
-        $daerah = $this->getDaerah();
+        $daerah = $this->relationLoaded('daerah') ? $this->daerah : $this->getDaerah()->first();
         return $daerah ? $daerah->Nama_Daerah : null;
     }
 
@@ -81,10 +100,13 @@ class Lokaliti extends Model
      */
     public function getPengundiCountAttribute()
     {
-        return Pengundi::where('Kod_DUN', ltrim($this->Kod_DUN, '0') ?: '0')
-            ->where('Kod_Daerah', ltrim($this->Kod_Daerah, '0') ?: '0')
-            ->where('Kod_Lokaliti', ltrim($this->Kod_Lokaliti, '0') ?: '0')
-            ->count();
+        return \App\Services\PengundiCountByLokalitiService::getCount(
+            $this->Kod_Negeri,
+            $this->Kod_Parlimen,
+            $this->Kod_DUN,
+            $this->Kod_Daerah,
+            $this->Kod_Lokaliti,
+        );
     }
 
     /**

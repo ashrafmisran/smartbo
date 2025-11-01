@@ -18,6 +18,14 @@ class Dun extends Model
         'Nama_DUN',
     ];
 
+    /**
+     * Default eager loads to avoid N+1 in tables
+     */
+    protected $with = [
+        'negeri',
+        'parlimen',
+    ];
+
     // BelongsTo relationships
     public function negeri()
     {
@@ -27,6 +35,28 @@ class Dun extends Model
     public function parlimen()
     {
         return $this->belongsTo(Parlimen::class, 'Kod_Parlimen', 'Kod_Parlimen');
+    }
+
+    // HasMany relationships for counts
+    public function daerahs()
+    {
+        return $this->hasMany(Daerah::class, 'Kod_DUN', 'Kod_DUN')
+            ->whereColumn('daerah.Kod_Negeri', 'dun.Kod_Negeri')
+            ->whereColumn('daerah.Kod_Parlimen', 'dun.Kod_Parlimen');
+    }
+
+    public function lokalitis()
+    {
+        return $this->hasMany(Lokaliti::class, 'Kod_DUN', 'Kod_DUN')
+            ->whereColumn('lokaliti.Kod_Negeri', 'dun.Kod_Negeri')
+            ->whereColumn('lokaliti.Kod_Parlimen', 'dun.Kod_Parlimen');
+    }
+
+    public function pengundis()
+    {
+        return $this->hasMany(Pengundi::class, 'Kod_DUN', 'Kod_DUN')
+            ->whereColumn('daftara.Kod_Negeri', 'dun.Kod_Negeri')
+            ->whereColumn('daftara.Kod_Parlimen', 'dun.Kod_Parlimen');
     }
 
     // Custom methods for relationships that use other models
@@ -62,12 +92,12 @@ class Dun extends Model
 
     public function getLokalitisCountAttribute()
     {
-        return $this->getLokalitis()->count();
+        return $this->relationLoaded('lokalitis') ? $this->lokalitis->count() : $this->getLokalitis()->count();
     }
 
     public function getPengundisCountAttribute()
     {
-        return $this->getPengundis()->count();
+        return $this->relationLoaded('pengundis') ? $this->pengundis->count() : $this->getPengundis()->count();
     }
 
     public function getFullLocationAttribute()

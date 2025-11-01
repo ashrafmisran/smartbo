@@ -20,6 +20,15 @@ class Daerah extends Model
     ];
 
     /**
+     * Default eager-loaded relations to avoid N+1 in index tables.
+     */
+    protected $with = [
+        'negeri',
+        'parlimen',
+        'dun',
+    ];
+
+    /**
      * Get the negeri that this daerah belongs to
      */
     public function negeri()
@@ -79,9 +88,12 @@ class Daerah extends Model
      */
     public function getLokalitisCountAttribute()
     {
-        return Lokaliti::where('Kod_DUN', $this->Kod_DUN)
-            ->where('Kod_Daerah', $this->Kod_Daerah)
-            ->count();
+        return \App\Services\LokalitiCountByDaerahService::getCount(
+            $this->Kod_Negeri,
+            $this->Kod_Parlimen,
+            $this->Kod_DUN,
+            $this->Kod_Daerah,
+        );
     }
 
     /**
@@ -89,9 +101,12 @@ class Daerah extends Model
      */
     public function getPengundiCountAttribute()
     {
-        return Pengundi::where('Kod_DUN', ltrim($this->Kod_DUN, '0') ?: '0')
-            ->where('Kod_Daerah', ltrim($this->Kod_Daerah, '0') ?: '0')
-            ->count();
+        return \App\Services\PengundiCountByDaerahService::getCount(
+            $this->Kod_Negeri,
+            $this->Kod_Parlimen,
+            $this->Kod_DUN,
+            $this->Kod_Daerah,
+        );
     }
 
     /**
