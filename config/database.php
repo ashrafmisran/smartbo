@@ -65,12 +65,12 @@ return [
 
         'ssdp' => [
             'driver' => 'mysql',
-            'url' => env('DB_URL'),
-            'host' => env('DB_HOST_SABAH'),
-            'port' => env('DB_PORT_SABAH'),
-            'database' => env('DB_DATABASE_SABAH'),
-            'username' => env('DB_USERNAME_SABAH'),
-            'password' => env('DB_PASSWORD_SABAH'),
+            'url' => env('DB_URL',''),
+            'host' => env('DB_HOST_SSDP'),
+            'port' => env('DB_PORT_SSDP'),
+            'database' => env('DB_DATABASE_SSDP'),
+            'username' => env('DB_USERNAME_SSDP'),
+            'password' => env('DB_PASSWORD_SSDP'),
             'unix_socket' => env('DB_SOCKET', ''),
             'charset' => env('DB_CHARSET', 'utf8mb4'),
             'collation' => env('DB_COLLATION', 'utf8mb4_unicode_ci'),
