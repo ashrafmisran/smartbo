@@ -7,11 +7,18 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Schemas\Schema;
-use Illuminate\Support\Facades\Hash;
 use App\Models\User;
 
 class Register extends BaseRegister
 {
+    public function defaultForm(Schema $schema): Schema
+    {
+        // Ensure the schema knows the model so relationship() fields work.
+        return $schema
+            ->model(User::class)
+            ->statePath('data');
+    }
+
     public function form(Schema $schema): Schema
     {
         return $schema
@@ -22,10 +29,11 @@ class Register extends BaseRegister
                 ->label('No. Keahlian PAS')
                 ->required()
                 ->maxLength(7),
-              Select::make('division_id')
+              Select::make('division')
                 ->label('Kawasan Keahlian PAS')
-                ->relationship('division', 'Nama_Parlimen')
+                ->options(\App\Models\Kawasan::pluck('name', 'id'))
                 ->searchable()
+                ->preload()
                 ->required(),
               $this->getPasswordFormComponent(),
               $this->getPasswordConfirmationFormComponent(),
@@ -34,23 +42,20 @@ class Register extends BaseRegister
 
     protected function handleRegistration(array $data): User
     {
-        $data = $this->form->getState();
-
-        //dd($data);
-        
+        // In Filament, the password is already hashed by the form component's dehydrateStateUsing.
         $user = User::create([
           'name' => $data['name'],
           'email' => $data['email'],
           'pas_membership_no' => $data['pas_membership_no'],
-          'division_id' => $data['division_id'],
-          'password' => Hash::make($data['password']),
+          'division' => $data['division'] ?? null,
+          'password' => $data['password'],
         ]);
         
           
         auth()->login($user);
 
         // Attach the user to a default team
-        $user->databases()->syncWithoutDetaching([1]);
+        //$user->databases()->syncWithoutDetaching([1]);
 
         return $user;
     }

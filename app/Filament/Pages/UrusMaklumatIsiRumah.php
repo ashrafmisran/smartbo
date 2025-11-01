@@ -554,4 +554,9 @@ class UrusMaklumatIsiRumah extends Page implements
                 }),
         ];
     }
+
+    public static function canAccess(): bool
+    {
+        return auth()->check() && auth()->user()->is_superadmin;
+    }
 }

@@ -106,4 +106,9 @@ abstract class BaseResource extends Resource
             ],
         ];
     }
+
+    public static function canViewAny(): bool
+    {
+        return auth()->check() && auth()->user()->is_superadmin; // By default, only admin users can view resources
+    }
 }

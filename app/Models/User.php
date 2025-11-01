@@ -28,7 +28,10 @@ class User extends Authenticatable implements FilamentUser //implements HasTenan
         'email',
         'password',
         'pas_membership_no',
-        'division_id',
+        'division',
+        'status',
+        'is_admin',
+        'is_superadmin',
     ];
 
     /**
@@ -61,7 +64,7 @@ class User extends Authenticatable implements FilamentUser //implements HasTenan
 
     public function division()
     {
-        return $this->belongsTo(Parlimen::class, 'division_id', 'REC_ID');
+        return $this->belongsTo(Kawasan::class, 'division', 'id');
     }
 
     public function getTenants(Panel $panel = null): Collection
@@ -81,6 +84,7 @@ class User extends Authenticatable implements FilamentUser //implements HasTenan
 
     public function canAccessPanel(Panel $panel): bool
     {
-        return true;
+        return $this->status != 'suspended' || $this->status != 'pending';
     }
+
 }
