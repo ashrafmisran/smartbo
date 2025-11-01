@@ -46,7 +46,7 @@
 <body>
     <div class="maintenance-container">
         <div class="maintenance-icon">🔧</div>
-        <h1>Dalam Penyelenggaraan</h1>
+        <h3>Dalam Penyelenggaraan</h3>
         <div class="back-soon">
             <p>Kami sedang tidak tidur malam melakukan penyelenggaraan untuk meningkatkan keselamatan sistem.</p>
             <p>Terima kasih atas kesabaran anda!</p>
