@@ -11,8 +11,9 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Collection;
 use App\Models\Database;
+use Filament\Models\Contracts\FilamentUser;
 
-class User extends Authenticatable //implements HasTenants
+class User extends Authenticatable implements FilamentUser //implements HasTenants
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
