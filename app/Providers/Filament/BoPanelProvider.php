@@ -27,6 +27,7 @@ class BoPanelProvider extends PanelProvider
         return $panel
             ->default()
             ->id('bo')
+            ->sidebarCollapsibleOnDesktop(true)
             ->path('bo')
             ->brandLogo('/storage/img/telecall.png')
             ->favicon('/storage/img/favicon.png')
@@ -37,8 +38,8 @@ class BoPanelProvider extends PanelProvider
             ->colors([
                 'primary' => Color::Blue[950],
             ])
-            ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
-            ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
+            ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
+            ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->pages([
                 Dashboard::class,
             ])

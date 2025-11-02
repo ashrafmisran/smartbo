@@ -7,13 +7,12 @@ use App\Filament\Resources\Pengundis\Pages\CreatePengundi;
 use App\Filament\Resources\Pengundis\Pages\EditPengundi;
 use App\Filament\Resources\Pengundis\Pages\ListPengundis;
 use App\Filament\Resources\Pengundis\Pages\ViewPengundi;
+use App\Filament\Resources\Pengundis\Pages\TelecallPengundi;
 use App\Filament\Resources\Pengundis\Schemas\PengundiForm;
 use App\Filament\Resources\Pengundis\Schemas\PengundiInfolist;
 use App\Filament\Resources\Pengundis\Tables\PengundisTable;
-use App\Filament\Concerns\HasTelecallAction;
 use App\Models\Pengundi;
 use Illuminate\Contracts\Support\Htmlable;
-use Filament\Actions\Action;
 use BackedEnum;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -22,8 +21,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class PengundiResource extends BaseResource
 {
-    use HasTelecallAction;
-    
     protected static ?string $model = Pengundi::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
@@ -111,6 +108,7 @@ class PengundiResource extends BaseResource
             'create' => CreatePengundi::route('/create'),
             'view' => ViewPengundi::route('/{record}'),
             'edit' => EditPengundi::route('/{record}/edit'),
+            'telecall' => TelecallPengundi::route('/{record}/telecall')
         ];
     }
 

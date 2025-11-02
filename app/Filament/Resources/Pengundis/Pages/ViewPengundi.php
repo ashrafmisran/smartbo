@@ -2,21 +2,17 @@
 
 namespace App\Filament\Resources\Pengundis\Pages;
 
-use App\Filament\Concerns\HasTelecallAction;
 use App\Filament\Resources\Pengundis\PengundiResource;
 use Filament\Actions\EditAction;
 use Filament\Resources\Pages\ViewRecord;
 
 class ViewPengundi extends ViewRecord
 {
-    use HasTelecallAction;
-    
     protected static string $resource = PengundiResource::class;
 
     protected function getHeaderActions(): array
     {
         return [
-            $this->getTelecallAction(),
             EditAction::make(),
         ];
     }

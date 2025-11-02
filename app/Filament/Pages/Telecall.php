@@ -6,7 +6,6 @@ use App\Models\Dun;
 use App\Models\Daerah;
 use App\Models\Lokaliti;
 use App\Models\Pengundi;
-use App\Filament\Concerns\HasTelecallAction;
 use Filament\Pages\Page;
 use Filament\Forms;
 use Filament\Tables;
@@ -29,7 +28,6 @@ class Telecall extends Page implements
 {
     use Forms\Concerns\InteractsWithForms;
     use Tables\Concerns\InteractsWithTable;
-    use HasTelecallAction;
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-users';
     protected static ?string $navigationLabel = 'Telecall';
@@ -260,7 +258,12 @@ class Telecall extends Page implements
     protected function getTableActions(): array
     {
         return [
-            $this->getTelecallAction(),
+            Action::make('hubungi')
+                ->icon('heroicon-o-phone')
+                ->iconButton()
+                ->color('success')
+                ->url(fn (Pengundi $record) => "/bo/senarai-pengundi/{$record->No_KP_Baru}/telecall")
+                ->openUrlInNewTab(),
         ];
     }
 
