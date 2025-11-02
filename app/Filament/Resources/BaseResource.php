@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use Filament\Panel;
 use Filament\Resources\Resource;
 use Illuminate\Support\Str;
+use Illuminate\Database\Eloquent\Model;
 
 abstract class BaseResource extends Resource
 {
@@ -17,6 +18,13 @@ abstract class BaseResource extends Resource
         $slug = 'senarai-' . Str::kebab($modelName);
         
         return $slug;
+    }
+
+    public static function getGlobalSearchResultDetails(Model $record): array
+    {
+        return [
+            //
+        ];
     }
     
     public static function getNavigationGroup(): ?string
@@ -110,5 +118,10 @@ abstract class BaseResource extends Resource
     public static function canViewAny(): bool
     {
         return auth()->check() && auth()->user()->is_superadmin; // By default, only admin users can view resources
+    }
+
+    public static function canGloballySearch(): bool
+    {
+        return false;
     }
 }
