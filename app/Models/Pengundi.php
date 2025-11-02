@@ -51,11 +51,42 @@ class Pengundi extends Model
     ];
 
     /**
+     * Boot the model and add global scope for column selection
+     */
+    protected static function boot()
+    {
+        parent::boot();
+        
+        static::addGlobalScope('allowedColumns', function ($builder) {
+            $builder->select([
+                'No_KP_Baru',
+                'Nama',
+                'Kod_Negeri',
+                'Kod_Parlimen', 
+                'Kod_DUN',
+                'Kod_Daerah',
+                'Kod_Lokaliti',
+                'Keturunan',
+                'Bangsa',
+                'Agama',
+            ]);
+        });
+    }
+
+    /**
      * Override newQuery to always select only allowed columns
      */
     public function newQuery()
     {
         return parent::newQuery()->select($this->allowedColumns);
+    }
+
+    /**
+     * Override newQueryWithoutScopes to always select only allowed columns
+     */
+    public function newQueryWithoutScopes()
+    {
+        return parent::newQueryWithoutScopes()->select($this->allowedColumns);
     }
 
     /**
@@ -94,11 +125,18 @@ class Pengundi extends Model
     {
         // Only include related records that actually have at least one phone number present
         return $this->hasMany(Bancian::class, 'No_KP_Baru', 'No_KP_Baru')
+            ->select(['No_KP_Baru', 'Tel_Bimbit', 'Tel_Rumah', 'Catatan'])
             ->where(function ($q) {
-                $q->where(function ($q1) {
-                    $q1->whereNotNull('Tel_Bimbit')->where('Tel_Bimbit', '!=', '');
-                })->orWhere(function ($q2) {
-                    $q2->whereNotNull('Tel_Rumah')->where('Tel_Rumah', '!=', '');
+                $q->where(function ($query) {
+                    $query->where(function ($subQuery) {
+                        $subQuery->whereNotNull('Tel_Bimbit')
+                                 ->where('Tel_Bimbit', '!=', '')
+                                 ->where('Tel_Bimbit', '!=', '0');
+                    })->orWhere(function ($subQuery) {
+                        $subQuery->whereNotNull('Tel_Rumah')
+                                 ->where('Tel_Rumah', '!=', '')
+                                 ->where('Tel_Rumah', '!=', '0');
+                    });
                 });
             });
     }
@@ -173,5 +211,10 @@ class Pengundi extends Model
         $list = $this->phone_numbers;
         return $list[0] ?? null;
     }
+
+    // Cast phone number separated by commas into array
+    protected $casts = [
+        'phone_numbers' => 'array',
+    ];
 
 }
