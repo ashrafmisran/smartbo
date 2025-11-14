@@ -52,23 +52,60 @@ class TelecallService
 
     /**
      * Get phone numbers from a Pengundi record
+     * Handles comma-separated values in Tel_Bimbit and Tel_Rumah
      */
     public static function getPhoneNumbers($pengundi): array
     {
         $numbers = [];
         
         try {
-            foreach ($pengundi->tel_numbers as $bancian) {
+            $bancian = $pengundi->bancian;
+            
+            if ($bancian) {
+                // Process Tel_Bimbit (mobile numbers)
                 if ($bancian->Tel_Bimbit && $bancian->Tel_Bimbit != '' && $bancian->Tel_Bimbit != '0') {
-                    $numbers[] = $bancian->Tel_Bimbit;
+                    $mobileNumbers = self::parsePhoneNumbers($bancian->Tel_Bimbit, 'Bimbit');
+                    $numbers = array_merge($numbers, $mobileNumbers);
                 }
+                
+                // Process Tel_Rumah (home numbers)
                 if ($bancian->Tel_Rumah && $bancian->Tel_Rumah != '' && $bancian->Tel_Rumah != '0') {
-                    $numbers[] = $bancian->Tel_Rumah;
+                    $homeNumbers = self::parsePhoneNumbers($bancian->Tel_Rumah, 'Rumah');
+                    $numbers = array_merge($numbers, $homeNumbers);
                 }
             }
         } catch (\Exception $e) {
             // If we can't access phone numbers due to permissions, return empty array
             \Log::warning("Could not fetch phone numbers for pengundi: " . $e->getMessage());
+        }
+        
+        // Remove duplicates and return
+        return array_values(array_unique($numbers, SORT_REGULAR));
+    }
+
+    /**
+     * Parse comma-separated phone numbers and format them
+     */
+    private static function parsePhoneNumbers($phoneString, $type): array
+    {
+        $numbers = [];
+        
+        // Split by comma and clean up
+        $phoneArray = explode(',', $phoneString);
+        
+        foreach ($phoneArray as $phone) {
+            $phone = trim($phone);
+            
+            // Skip empty or invalid numbers
+            if ($phone === '' || $phone === '0' || $phone === '-') {
+                continue;
+            }
+            
+            $numbers[] = [
+                'number' => $phone,
+                'type' => $type,
+                'display' => $phone . ' (' . $type . ')',
+            ];
         }
         
         return $numbers;

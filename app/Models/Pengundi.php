@@ -48,6 +48,8 @@ class Pengundi extends Model
         'Keturunan',
         'Bangsa',
         'Agama',
+        'Kod_Cula',
+        'Catatan',
     ];
 
     /**
@@ -121,24 +123,42 @@ class Pengundi extends Model
         return $this->belongsTo(Dun::class, 'Kod_DUN', 'Kod_DUN');
     }
 
-    public function tel_numbers()
+    public function Tel_Bimbit()
     {
-        // Only include related records that actually have at least one phone number present
-        return $this->hasMany(Bancian::class, 'No_KP_Baru', 'No_KP_Baru')
-            ->select(['No_KP_Baru', 'Tel_Bimbit', 'Tel_Rumah', 'Catatan'])
-            ->where(function ($q) {
-                $q->where(function ($query) {
-                    $query->where(function ($subQuery) {
-                        $subQuery->whereNotNull('Tel_Bimbit')
-                                 ->where('Tel_Bimbit', '!=', '')
-                                 ->where('Tel_Bimbit', '!=', '0');
-                    })->orWhere(function ($subQuery) {
-                        $subQuery->whereNotNull('Tel_Rumah')
-                                 ->where('Tel_Rumah', '!=', '')
-                                 ->where('Tel_Rumah', '!=', '0');
-                    });
-                });
-            });
+        return $this->hasOne(Bancian::class, 'No_KP_Baru', 'No_KP_Baru')
+            ->select(['No_KP_Baru', 'Tel_Bimbit']);
+    }
+
+    public function Tel_Rumah(){
+        return $this->hasOne(Bancian::class, 'No_KP_Baru', 'No_KP_Baru')
+            ->select(['No_KP_Baru', 'Tel_Rumah']);
+    }
+
+    public function phone_numbers(){
+        $numbers = [];
+        array_merge($numbers, explode(',', $this->Tel_Bimbit()->pluck('Tel_Bimbit')->get() ?? []));
+        array_merge($numbers, explode(',', $this->Tel_Rumah()->pluck('Tel_Rumah')->get() ?? []));
+        return array_values(array_unique($numbers));
+    }
+
+    /**
+     * Get the full Bancian record with phone numbers and catatan
+     */
+    public function bancian()
+    {
+        return $this->hasOne(Bancian::class, 'No_KP_Baru', 'No_KP_Baru')
+            ->select(['No_KP_Baru', 'Tel_Bimbit', 'Tel_Rumah', 'Catatan']);
+    }
+
+    public function getCatatanAttribute(){
+        // First check if Catatan exists in the pengundi record itself
+        if (isset($this->attributes['Catatan']) && $this->attributes['Catatan'] !== null) {
+            return $this->attributes['Catatan'];
+        }
+        
+        // If not, try to get it from bancian
+        $bancian = $this->bancian;
+        return $bancian ? $bancian->Catatan : null;
     }
 
     /**
@@ -188,18 +208,10 @@ class Pengundi extends Model
     {
         $numbers = [];
 
-        foreach ($this->tel_numbers as $rec) {
-            $mobile = trim((string) ($rec->Tel_Bimbit ?? ''));
-            $home = trim((string) ($rec->Tel_Rumah ?? ''));
-
-            if ($mobile !== '') {
-                $numbers[] = $mobile;
-            }
-            if ($home !== '') {
-                $numbers[] = $home;
-            }
-        }
-
+        $b = implode(',', $this->Tel_Bimbit()->pluck('Tel_Bimbit')->toArray());
+        $r = implode(',', $this->Tel_Rumah()->pluck('Tel_Rumah')->toArray());
+        array_merge($numbers, explode(',', $b));
+        array_merge($numbers, explode(',', $r));
         return array_values(array_unique($numbers));
     }
 
