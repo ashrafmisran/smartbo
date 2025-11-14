@@ -87,7 +87,7 @@ class Telecall extends Page implements
         }
 
         // Only include records that have at least one phone number
-        return $query->whereHas('tel_numbers');
+        return $query ;//->whereHas('Tel_Bimbit')->orWhereHas('Tel_Rumah');
     }
 
     // Form schema for filters
@@ -220,7 +220,7 @@ class Telecall extends Page implements
         // Cheap whereIn query for snappy re-renders
         return Pengundi::query()
             ->whereIn('No_KP_Baru', $this->randomIds)
-            ->with('negeri', 'parlimen', 'dun','tel_numbers');
+            ->with('negeri', 'parlimen', 'dun'); // todo: to add phone_numbers once relationship issue resolved
     }
 
     // Disable pagination
