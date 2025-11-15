@@ -35,16 +35,11 @@ class CallRecordsTable
                         
                     TextColumn::make('phone_number')
                         ->label('Nombor Telefon')
-                        ->url(fn ($record) => $record->phone_number ? "tel:{$record->phone_number}" : null)
+                        ->url(fn ($record) => $record->phone_number ? "tel:" . preg_replace('/\D/', '', $record->phone_number) : null)
                         ->searchable()
                         ->badge()
-                        ->sortable(),
-                        TextColumn::make('phone_number')
-                            ->label('Nombor Telefon')
-                            ->url(fn ($record) => $record->phone_number ? "tel:" . preg_replace('/\D/', '', $record->phone_number) : null)
-                            ->searchable()
-                            ->badge()
-                            ->sortable(),                    
+                        ->sortable(),                    
+                    
                     TextColumn::make('kod_cula')
                         ->label('Kod Cula')
                         ->badge()
@@ -99,19 +94,6 @@ class CallRecordsTable
                         ->since()
                         ->default(fn ($record) => $record->created_at),
                         
-                    TextColumn::make('created_at')
-                        ->label('Dicipta')
-                        ->dateTime('d/m/Y H:i')
-                        ->since()
-                        ->sortable()
-                        ->toggleable(isToggledHiddenByDefault: true),
-                        
-                    TextColumn::make('updated_at')
-                        ->label('Dikemaskini')
-                        ->dateTime('d/m/Y H:i')
-                        ->since()
-                        ->sortable()
-                        ->toggleable(isToggledHiddenByDefault: true),
                 ])
                 ->from('md')
             ])
