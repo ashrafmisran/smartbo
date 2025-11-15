@@ -14,11 +14,15 @@ return new class extends Migration
         Schema::create('call_records', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->foreignId('pengundi_id')->constrained()->onDelete('cascade');
-            $table->unsignedInteger('phone_number');
+            $table->string('pengundi_ic');
+            $table->string('phone_number');
             $table->string('kod_cula')->nullable();
             $table->text('notes')->nullable();
+            $table->timestamp('called_at')->after('notes');
             $table->timestamps();
+
+            $table->index(['pengundi_ic', 'called_at']);
+            $table->index(['user_id', 'called_at']);
         });
     }
 
