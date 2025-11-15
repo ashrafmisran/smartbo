@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('phone_number');
             $table->string('kod_cula')->nullable();
             $table->text('notes')->nullable();
-            $table->timestamp('called_at')->after('notes');
+            $table->timestamp('called_at');
             $table->timestamps();
 
             $table->index(['pengundi_ic', 'called_at']);
