@@ -20,9 +20,19 @@ class CallRecordResource extends Resource
 {
     protected static ?string $model = CallRecord::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::NumberedList;
 
     protected static ?string $recordTitleAttribute = 'phone_number';
+
+    public static function getNavigationGroup(): ?string
+    {
+        return 'OPERASI';
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return 'Rekod Nombor Dihubungi';
+    }
 
     public static function getGlobalSearchResultUrl(Model $record): string
     {
