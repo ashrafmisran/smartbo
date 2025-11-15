@@ -18,37 +18,34 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class PengundiResource extends BaseResource
 {
     protected static ?string $model = Pengundi::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
-   
-    public static function getGloballySearchableAttributes(): array
-    {
-        return ['Nama', 'No_KP_Baru'];
-    }
 
-    public static function getGlobalSearchResultTitle(Model $record): string | Htmlable
-{
-    return $record->Nama;
-}
+//     public static function getGlobalSearchResultTitle(Model $record): string | Htmlable
+//     {
+//         return $record->Nama;
+//     }
 
-#
+// #
 
-    public static function getGlobalSearchResultDetails(Model $record): array
-    {
-        return [
-            'MyKAD' => $record->No_KP_Baru,
-        ];
-    }
+//     public static function getGlobalSearchResultDetails(Model $record): array
+//     {
+//         return [
+//             'MyKAD' => $record->No_KP_Baru,
+//         ];
+//     }
 
-    public static function getGlobalSearchResultUrl(Model $record): string
-    {
-        return static::getUrl('view', ['record' => $record]);
-    }
-
+//     public static function getGlobalSearchResultActions(Model $record): array
+//     {
+//         return [
+//             // No additional actions needed - clicking the result goes to telecall
+//         ];
+//     }
 
 
 
@@ -81,6 +78,11 @@ class PengundiResource extends BaseResource
             ->where('No_KP_Baru', '!=', '');
     }
 
+    // public static function getGlobalSearchEloquentQuery(): \Illuminate\Database\Eloquent\Builder
+    // {
+    //     return static::getEloquentQuery();
+    // }
+
     // If you only have read access, uncomment these methods:
     /*
     public static function canEdit(\Illuminate\Database\Eloquent\Model $record): bool
@@ -93,6 +95,8 @@ class PengundiResource extends BaseResource
         return false; // Disable deleting if no database write access
     }
     */
+
+    
 
     public static function getRelations(): array
     {
@@ -117,9 +121,9 @@ class PengundiResource extends BaseResource
         return auth()->user()->is_admin;
     }
 
-    public static function canGloballySearch(): bool
-    {
-        return true;
-    }
+    // public static function canGloballySearch(): bool
+    // {
+    //     return true;
+    // }
 
 }

@@ -71,6 +71,8 @@ class Pengundi extends Model
                 'Keturunan',
                 'Bangsa',
                 'Agama',
+                'Kod_Cula',
+                'Catatan',
             ]);
         });
     }
@@ -228,5 +230,14 @@ class Pengundi extends Model
     protected $casts = [
         'phone_numbers' => 'array',
     ];
+
+    /**
+     * Get visible actions for Filament global search.
+     * This method is called by Filament's global search blade template.
+     */
+    public function getVisibleActions(): array
+    {
+        return []; // No actions needed for global search results
+    }
 
 }
