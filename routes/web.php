@@ -5,7 +5,8 @@ use App\Models\Dun;
 use App\Models\Pengundi;
 
 Route::get('/', function () {
-    return view('welcome');
+    //return view('welcome');
+    return redirect('/bo');
 });
 
 Route::get('/debug-pengundi', function () {
