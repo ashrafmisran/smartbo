@@ -58,7 +58,12 @@ abstract class BaseResource extends Resource
         if (method_exists(static::class, 'getModel')) {
             $model = static::getModel();
             if (class_exists($model)) {
-
+                if (in_array($model, [
+                    \App\Models\Negeri::class,
+                    \App\Models\Parlimen::class,
+                ])) {
+                    return null;
+                }
                 //return '0';
                 return (string) $model::count();
             }
@@ -70,16 +75,16 @@ abstract class BaseResource extends Resource
     {
         return [
             // DATA PILIHAN RAYA GROUP
-            \App\Filament\Resources\Negeris\NegeriResource::class => [
-                'group' => 'DATA PILIHAN RAYA',
-                'sort' => 1,
-                'label' => 'Negeri',
-            ],
-            \App\Filament\Resources\Parlimens\ParlimenResource::class => [
-                'group' => 'DATA PILIHAN RAYA',
-                'sort' => 2,
-                'label' => 'Parlimen',
-            ],
+            // \App\Filament\Resources\Negeris\NegeriResource::class => [
+            //     'group' => 'DATA PILIHAN RAYA',
+            //     'sort' => 1,
+            //     'label' => 'Negeri',
+            // ],
+            // \App\Filament\Resources\Parlimens\ParlimenResource::class => [
+            //     'group' => 'DATA PILIHAN RAYA',
+            //     'sort' => 2,
+            //     'label' => 'Parlimen',
+            // ],
             \App\Filament\Resources\Duns\DunResource::class => [
                 'group' => 'DATA PILIHAN RAYA',
                 'sort' => 3,

@@ -51,6 +51,11 @@ class Telecall extends Page implements
         return 'OPERASI';
     }
 
+    public static function canAccess(): bool
+    {
+        return auth()->user()->status <> 'pending';
+    }
+
     // Helper methods to pad values with leading zeros
     private function padDunCode($code): string
     {
@@ -220,6 +225,10 @@ class Telecall extends Page implements
         // Cheap whereIn query for snappy re-renders
         return Pengundi::query()
             ->whereIn('No_KP_Baru', $this->randomIds)
+            ->where(function ($query) {
+                $query->whereNotNull('Tel_Bimbit')
+                      ->where('Tel_Bimbit', '!=', '');
+            })
             ->with('negeri', 'parlimen', 'dun'); // todo: to add phone_numbers once relationship issue resolved
     }
 

@@ -192,11 +192,11 @@ class TelecallPengundi extends ViewRecord
                             ->inlineLabel()
                             ->weight('bold'),
 
-                        TextEntry::make('Agama')
-                            ->label('Agama')
-                            ->placeholder('-')
-                            ->inlineLabel()
-                            ->weight('bold'),
+                        // TextEntry::make('Agama')
+                        //     ->label('Agama')
+                        //     ->placeholder('-')
+                        //     ->inlineLabel()
+                        //     ->weight('bold'),
                             
                         TextEntry::make('Keturunan')
                             ->label('Bangsa')
