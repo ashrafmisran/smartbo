@@ -19,6 +19,8 @@ use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use App\Livewire\StatsOverview;
+use App\Livewire\AccountOverview;
 
 class BoPanelProvider extends PanelProvider
 {
@@ -46,8 +48,10 @@ class BoPanelProvider extends PanelProvider
             ->globalSearchKeyBindings(['command+k', 'ctrl+k'])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->widgets([
-                AccountWidget::class,
-                FilamentInfoWidget::class,
+                //AccountWidget::class,
+                StatsOverview::class,
+                AccountOverview::class,
+                //FilamentInfoWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,

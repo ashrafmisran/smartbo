@@ -48,6 +48,12 @@ class CallRecordResource extends Resource
         return $query;
     }
 
+    public static function canViewAny(): bool
+    {
+        // Allow access if user is not pending
+        return auth()->user()->status !== 'pending';
+    }
+
     public static function form(Schema $schema): Schema
     {
         return CallRecordForm::configure($schema);

@@ -29,7 +29,7 @@ class Pengundi extends Model
         'Kod_Lokaliti',
         'Keturunan',
         'Bangsa',
-        'Agama',
+        //'Agama',
         'Kod_Cula',
         'Catatan',
     ];
@@ -47,7 +47,7 @@ class Pengundi extends Model
         'Kod_Lokaliti',
         'Keturunan',
         'Bangsa',
-        'Agama',
+        //'Agama',
         'Kod_Cula',
         'Catatan',
     ];
@@ -70,7 +70,7 @@ class Pengundi extends Model
                 'Kod_Lokaliti',
                 'Keturunan',
                 'Bangsa',
-                'Agama',
+                //'Agama',
                 'Kod_Cula',
                 'Catatan',
             ]);
