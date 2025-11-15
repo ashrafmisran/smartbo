@@ -17,6 +17,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Notifications\Notification;
 use Filament\Actions\Action as PageAction;
 use Filament\Actions\Action;
+use Filament\Tables\Columns\Layout\Split;
 use BackedEnum;
 use Filament\Support\Enums\Width;
 use Filament\Infolists\Components\TextEntry;
@@ -242,24 +243,28 @@ class Telecall extends Page implements
     protected function getTableColumns(): array
     {
         return [
-            TextColumn::make('No_KP_Baru')
-                ->label('No. KP')
-                ->description(
-                    function ($record) {
-                        $umur = now()->year - (2000 + (int)substr($record->No_KP_Baru, 0, 2));
-                        if ($umur < 18) $umur += 100;
-                        $jantina = ((int)substr($record->No_KP_Baru, -2) % 2 === 0) ? 'Perempuan' : 'Lelaki';
-                        return "Umur: {$umur} tahun | Jantina: {$jantina}";
-                    }
-                )
-                ->width('150px'),
+            Split::make([
 
-            TextColumn::make('Nama')
-                ->label('Nama Pengundi')
-                ->weight('bold')
-                ->description(
-                    fn ($record) => 'Agama: ' . ($record->Agama ?? '-') . ' | Bangsa: ' . ($record->Keturunan ?? '-') . ' | Etnik: ' . ($record->Bangsa ?? '-')
-                ),
+                TextColumn::make('No_KP_Baru')
+                    ->label('No. KP')
+                    ->description(
+                        function ($record) {
+                            $umur = now()->year - (2000 + (int)substr($record->No_KP_Baru, 0, 2));
+                            if ($umur < 18) $umur += 100;
+                            $jantina = ((int)substr($record->No_KP_Baru, -2) % 2 === 0) ? 'Perempuan' : 'Lelaki';
+                            return "Umur: {$umur} tahun | Jantina: {$jantina}";
+                        }
+                    )
+                    ->width('150px'),
+    
+                TextColumn::make('Nama')
+                    ->label('Nama Pengundi')
+                    ->weight('bold')
+                    ->description(
+                        fn ($record) => 'Agama: ' . ($record->Agama ?? '-') . ' | Bangsa: ' . ($record->Keturunan ?? '-') . ' | Etnik: ' . ($record->Bangsa ?? '-')
+                    ),
+
+            ])->from('md')
 
         ];
     }
