@@ -13,10 +13,12 @@ use Filament\Infolists\Components\ViewEntry;
 use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Forms\Components\ToggleButtons;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\Radio;
 use Filament\Notifications\Notification;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Support\Enums\Alignment;
 use Filament\Actions\Action;
+use Illuminate\Support\Facades\DB;
 
 
 class TelecallPengundi extends ViewRecord
@@ -25,33 +27,60 @@ class TelecallPengundi extends ViewRecord
 
     protected string $view = 'filament.resources.pengundis.pages.telecall-pengundi';
     
-    public $kod_cula = '';
-    public $catatan = '';
+    public $culaan_data = [
+        'kod_cula' => '',
+        'catatan' => '',
+    ];
     
     public function mount(string|int $record): void
     {
         parent::mount($record);
         
-        $this->kod_cula = $this->record->Kod_Cula ?? '';
-        $this->catatan = $this->record->Catatan ?? '';
+        $this->culaan_data = [
+            'kod_cula' => $this->record->Kod_Cula ?? '',
+            'catatan' => $this->record->Catatan ?? '',
+        ];
     }
     
-    public function saveCulaan()
-    {
-        $this->record->update([
-            'Kod_Cula' => $this->kod_cula,
-            'Catatan' => $this->catatan,
-        ]);
-        
-        Notification::make()
-            ->title('Culaan disimpan!')
-            ->success()
-            ->send();
-    }
-
     public function getTitle(): string
     {
         return 'Telecall: ' . ($this->record->Nama ?? 'Pengundi');
+    }
+    
+    protected function getHeaderActions(): array
+    {
+        return [
+            
+        ];
+    }
+
+    public function recordCall($phoneNumber)
+    {
+        try {
+            // Record the call in call_records table
+            DB::table('call_records')->insert([
+                'user_id' => auth()->id(),
+                'pengundi_ic' => $this->record->No_KP_Baru,
+                'phone_number' => $phoneNumber,
+                'called_at' => now(),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+            
+            Notification::make()
+                ->title('Rekod panggilan disimpan!')
+                ->body('Panggilan ke ' . $phoneNumber . ' telah direkodkan.')
+                ->success()
+                ->send();
+        } catch (\Exception $e) {
+            Notification::make()
+                ->title('Ralat!')
+                ->body('Gagal merekod panggilan: ' . $e->getMessage())
+                ->danger()
+                ->send();
+        }
+        
+        return back();
     }
 
     protected function copyToClipboard($number)
@@ -82,10 +111,35 @@ class TelecallPengundi extends ViewRecord
                             ->alignStart(),
                         
                         TextEntry::make('Kod_Cula')
+                            ->state(function ($record) {
+                                $culaOptions = [
+                                    "VA" => "🤷🏻‍♂️ Atas Pagar",
+                                    "VB" => "💚 Undi Bulan",
+                                    "VC" => "⚪ Condong Bulan", 
+                                    "VD" => "⚖️ BN",
+                                    "VN" => "🚀 PH",
+                                    "VS" => "🪢 PN",
+                                    "VT" => "🪢 Rakan PN",
+                                    "VR" => "🗻 GRS",
+                                    "VW" => "❌ Salah nombor",
+                                    "VX" => "📵 Tiada jawapan",
+                                    "VY" => "🙅🏻‍♂️ Enggan respon",
+                                    "VZ" => "💆🏻‍♂️ Benci politik"
+                                ];
+                                
+                                $kodCula = trim($record->Kod_Cula ?? '');
+                                
+                                if (empty($kodCula)) {
+                                    return 'Tiada culaan';
+                                }
+                                
+                                return $culaOptions[$kodCula] ?? ('Unknown: ' . $kodCula);
+                            })
                             ->label('Culaan semasa')
                             ->inlineLabel()
                             ->weight('bold')
-                            ->placeholder('Tiada culaan'),
+                            ->placeholder('Tiada data')
+                            ->default('Tiada culaan'),
                             
                         TextEntry::make('No_KP_Baru')
                             ->label('No. KP')
@@ -165,27 +219,54 @@ class TelecallPengundi extends ViewRecord
                             ->inlineLabel()
                             ->weight('bold'),
                             
-                        // RepeatableEntry::make('phone_numbers')
-                        //     ->label('Nombor Telefon')
-                        //     ->getStateUsing(fn ($record) => TelecallService::getPhoneNumbers($record))
-                        //     ->schema([
-                        //         TextEntry::make('display')
-                        //             ->hiddenLabel()
-                        //             ->weight('medium')
-                        //             ->color('primary')
-                        //             ->icon('heroicon-o-phone')
-                        //             ->iconPosition('before')
-                        //             ->url(fn (Get $get) => 'tel:' . preg_replace('/\D+/', '', $get('number')))
-                        //             ->openUrlInNewTab(false)
-                        //             ->extraAttributes([
-                        //                 'class' => 'inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-primary-600 hover:text-primary-500 hover:bg-gray-50 rounded-lg transition-colors duration-200',
-                        //                 'onclick' => 'return confirm("Panggil ' . '" + this.textContent.trim() + "?")',
-                        //             ]),
-                        //     ])
-                        //     ->inlineLabel()
-                        //     ->grid(4)
-                        //     ->contained(false)
-                        //     ->columnSpanFull(),
+                    ]),
+                
+                Section::make('Nombor Telefon (Tekan nombor untuk push to phone)')
+                    ->icon('heroicon-o-phone')
+                    ->schema([
+                        RepeatableEntry::make('phone_numbers')
+                            ->hiddenLabel()
+                            ->getStateUsing(fn ($record) => TelecallService::getPhoneNumbers($record))
+                            ->schema([
+                                TextEntry::make('display')
+                                    ->hiddenLabel()
+                                    ->weight('medium')
+                                    ->color('primary')
+                                    ->icon('heroicon-o-phone')
+                                    ->iconPosition('before')
+                                    ->action(
+                                        Action::make('recordCall')
+                                            ->action(function (string $state) {
+                                                try {
+                                                    // Record the call in call_records table
+                                                    DB::table('call_records')->insert([
+                                                        'user_id' => auth()->id(),
+                                                        'pengundi_ic' => $this->record->No_KP_Baru,
+                                                        'phone_number' => $state,
+                                                        'called_at' => now(),
+                                                        'created_at' => now(),
+                                                        'updated_at' => now(),
+                                                    ]);
+
+                                                    Notification::make()
+                                                        ->title('Rekod panggilan disimpan!')
+                                                        ->body('Panggilan ke ' . $state . ' telah direkodkan.')
+                                                        ->success()
+                                                        ->send();
+
+                                                } catch (\Exception $e) {
+                                                    Notification::make()
+                                                        ->title('Ralat!')
+                                                        ->body('Gagal merekod panggilan: ' . $e->getMessage())
+                                                        ->danger()
+                                                        ->send();
+                                                }
+                                            })
+                                    )
+                            ])
+                            ->grid(4)
+                            ->contained(false)
+                            ->columnSpanFull()
                     ]),
 
                 Grid::make()
@@ -202,8 +283,6 @@ class TelecallPengundi extends ViewRecord
                         // Rekod culaan
                         Section::make('Rekod Culaan')
                             ->schema([
-                                ViewEntry::make('culaan_form')
-                                    ->view('filament.infolists.telecall-simple-form'),
                                 TextEntry::make('current_cula_display')
                                     ->label('Culaan Semasa')
                                     ->state(function ($record) {
@@ -222,11 +301,153 @@ class TelecallPengundi extends ViewRecord
                                             "VZ" => "💆🏻‍♂️ Benci politik"
                                         ];
                                         return $record->Kod_Cula ? ($culaOptions[$record->Kod_Cula] ?? $record->Kod_Cula) : 'Tiada culaan';
-                                    }),
+                                    })
+                                    ->weight('bold')
+                                    ->color(fn ($record) => $record->Kod_Cula ? 'success' : 'gray'),
+                                    
                                 TextEntry::make('Catatan')
                                     ->label('Catatan')
                                     ->placeholder('Tiada catatan')
-                                    ->limit(100),
+                                    ->limit(100)
+                                    ->color('gray'),
+                                
+                                    Action::make('edit_culaan')
+                                        ->label('Edit Culaan')
+                                        ->icon('heroicon-o-pencil')
+                                        ->color('primary')
+                                        ->form([
+                                            Radio::make('kod_cula')
+                                                ->label('Culaan')
+                                                ->options([
+                                                    "VA" => "🤷🏻‍♂️ Atas Pagar",
+                                                    "VB" => "💚 Undi Bulan",
+                                                    "VC" => "⚪ Condong Bulan", 
+                                                    "VD" => "⚖️ BN",
+                                                    "VN" => "🚀 PH",
+                                                    "VS" => "🪢 PN",
+                                                    "VT" => "🪢 Rakan PN",
+                                                    "VR" => "🗻 GRS",
+                                                    "VW" => "❌ Salah nombor",
+                                                    "VX" => "📵 Tiada jawapan",
+                                                    "VY" => "🙅🏻‍♂️ Enggan respon",
+                                                    "VZ" => "💆🏻‍♂️ Benci politik"
+                                                ])
+                                                ->columns(2)
+                                                ->required(),
+                                                
+                                            Textarea::make('catatan')
+                                                ->label('Catatan')
+                                                ->rows(3)
+                                                ->placeholder('Masukkan catatan...'),
+                                        ])
+                                        ->fillForm(function () {
+                                            return [
+                                                'kod_cula' => $this->record->Kod_Cula ?? '',
+                                                'catatan' => $this->record->Catatan ?? '',
+                                            ];
+                                        })
+                                        ->action(function (array $data) {
+                                            try {
+                                                // Debug logging
+                                                \Log::info('TelecallPengundi Action Data:', [
+                                                    'data' => $data,
+                                                    'record_kp' => $this->record->No_KP_Baru,
+                                                    'current_cula' => $this->record->Kod_Cula,
+                                                    'current_catatan' => $this->record->Catatan,
+                                                ]);
+                                                
+                                                // Use direct DB update
+                                                $updated = DB::connection('ssdp')
+                                                    ->table('daftara')
+                                                    ->where('No_KP_Baru', $this->record->No_KP_Baru)
+                                                    ->update([
+                                                        'Kod_Cula' => $data['kod_cula'] ?? '',
+                                                        'Catatan' => $data['catatan'] ?? '',
+                                                    ]);
+                                                
+                                                \Log::info('DB Update Result:', [
+                                                    'rows_affected' => $updated,
+                                                    'update_data' => [
+                                                        'Kod_Cula' => $data['kod_cula'] ?? '',
+                                                        'Catatan' => $data['catatan'] ?? '',
+                                                    ]
+                                                ]);
+                                                // Record the telecall activity in call_records
+                                                $existingCallRecord = DB::table('call_records')
+                                                    ->where('pengundi_ic', $this->record->No_KP_Baru)
+                                                    ->where('user_id', auth()->id())
+                                                    ->orderBy('created_at', 'desc')
+                                                    ->first();
+
+                                                if ($existingCallRecord) {
+                                                    // Update existing call record
+                                                    DB::table('call_records')
+                                                        ->where('id', $existingCallRecord->id)
+                                                        ->update([
+                                                            'kod_cula' => $data['kod_cula'] ?? '',
+                                                            'notes' => $data['catatan'] ?? '',
+                                                            'updated_at' => now(),
+                                                        ]);
+                                                } else {
+                                                    // Insert new call record
+                                                    DB::table('call_records')->insert([
+                                                        'user_id' => auth()->id(),
+                                                        'pengundi_ic' => $this->record->No_KP_Baru,
+                                                        'phone_number' => '', // We can add this if needed
+                                                        'kod_cula' => $data['kod_cula'] ?? '',
+                                                        'notes' => $data['catatan'] ?? '',
+                                                        'called_at' => now(),
+                                                        'created_at' => now(),
+                                                        'updated_at' => now(),
+                                                    ]);
+                                                }
+
+                                                if ($updated) {
+                                                    // Verify the update by re-reading from database
+                                                    $verifyRecord = DB::connection('ssdp')
+                                                        ->table('daftara')
+                                                        ->where('No_KP_Baru', $this->record->No_KP_Baru)
+                                                        ->select('Kod_Cula', 'Catatan')
+                                                        ->first();
+                                                    
+                                                    \Log::info('Verification Result:', [
+                                                        'db_kod_cula' => $verifyRecord->Kod_Cula ?? 'NULL',
+                                                        'db_catatan' => $verifyRecord->Catatan ?? 'NULL',
+                                                    ]);
+                                                    
+                                                    // Update local record
+                                                    $this->record->Kod_Cula = $data['kod_cula'] ?? '';
+                                                    $this->record->Catatan = $data['catatan'] ?? '';
+                                                    $this->culaan_data = $data;
+                                                    
+                                                    Notification::make()
+                                                        ->title('Culaan disimpan!')
+                                                        ->body('Kod Cula: ' . ($data['kod_cula'] ?? 'Kosong') . ', Catatan: ' . ($data['catatan'] ?: 'Tiada'))
+                                                        ->success()
+                                                        ->send();
+                                                        
+                                                    // Modal will close automatically after successful action
+                                                } else {
+                                                    throw new \Exception('Tiada baris yang dikemaskini - mungkin No_KP_Baru tidak dijumpai');
+                                                }
+                                            } catch (\Exception $e) {
+                                                \Log::error('Error saving culaan: ' . $e->getMessage(), [
+                                                    'data' => $data ?? 'No data',
+                                                    'record_kp' => $this->record->No_KP_Baru ?? 'No KP',
+                                                    'stack_trace' => $e->getTraceAsString(),
+                                                ]);
+                                                
+                                                Notification::make()
+                                                    ->title('Ralat!')
+                                                    ->body('Terdapat masalah: ' . $e->getMessage())
+                                                    ->danger()
+                                                    ->send();
+                                            }
+                                        })
+                                        ->modalHeading('Edit Culaan')
+                                        ->modalSubmitActionLabel('Simpan')
+                                        ->modalCancelActionLabel('Batal'),
+
                             ])
                             ->columnSpan(4),
                     ])
