@@ -31,6 +31,14 @@ class TelecallPengundi extends ViewRecord
         'kod_cula' => '',
         'catatan' => '',
     ];
+
+    /**
+     * Determine if the user can access telecall functionality
+     */
+    // public static function canAccess($parameters = []): bool
+    // {
+    //     return auth()->user()->status != 'pending';
+    // }
     
     public function mount(string|int $record): void
     {

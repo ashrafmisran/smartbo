@@ -118,8 +118,13 @@ class PengundiResource extends BaseResource
 
     public static function canViewAny(): bool
     {
-        return auth()->user()->is_admin;
+        //return auth()->user()->is_admin;
+        return auth()->user()->status != 'pending';
     }
+
+    // public static function canView(Model $record): bool
+    // {
+    // }
 
     // public static function canGloballySearch(): bool
     // {
