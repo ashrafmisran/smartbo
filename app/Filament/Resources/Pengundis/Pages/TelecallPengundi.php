@@ -249,10 +249,19 @@ class TelecallPengundi extends ViewRecord
                                                     ]);
 
                                                     Notification::make()
-                                                        ->title('Rekod panggilan disimpan!')
-                                                        ->body('Panggilan ke ' . $state . ' telah direkodkan.')
+                                                        ->title('Rekod panggilan disediakan!')
+                                                        ->body('Rekod panggilan ke ' . $state . ' telah disediakan dalam pengkalan data. Sila masukkan keputusan cula selepas panggilan selesai.')
                                                         ->success()
                                                         ->send();
+
+                                                    // Add mobile redirect to tel: link for mobile devices
+                                                    if (request()->header('User-Agent') && 
+                                                        (str_contains(strtolower(request()->header('User-Agent')), 'mobile') ||
+                                                         str_contains(strtolower(request()->header('User-Agent')), 'android') ||
+                                                         str_contains(strtolower(request()->header('User-Agent')), 'iphone'))) {
+                                                        
+                                                        $this->js("window.open('tel:$state', '_self');");
+                                                    }
 
                                                 } catch (\Exception $e) {
                                                     Notification::make()
