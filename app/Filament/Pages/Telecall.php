@@ -225,7 +225,7 @@ class Telecall extends Page implements
         // Cheap whereIn query for snappy re-renders
         return Pengundi::query()
             ->whereIn('No_KP_Baru', $this->randomIds)
-            ->where(function ($query) {
+            ->whereHas('bancian', function ($query) {
                 $query->whereNotNull('Tel_Bimbit')
                       ->where('Tel_Bimbit', '!=', '');
             })
