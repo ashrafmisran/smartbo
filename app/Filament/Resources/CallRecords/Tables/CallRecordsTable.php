@@ -26,6 +26,7 @@ class CallRecordsTable
                         ->label('User')
                         ->sortable()
                         ->searchable()
+                        ->hidden(!auth()->user()?->is_admin)
                         ->toggleable(isToggledHiddenByDefault: auth()->user()?->is_admin),
                         
                     TextColumn::make('pengundi_ic')

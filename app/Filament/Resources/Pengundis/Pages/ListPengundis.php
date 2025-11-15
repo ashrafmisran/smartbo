@@ -19,6 +19,11 @@ class ListPengundis extends ListRecords
         ];
     }
 
+    public static function canAccess($parameters = []): bool
+    {
+        return auth()->user()->is_admin;
+    }
+
     public function getTableRecordKey(Model|array $record): string
     {
         // Since there's no actual primary key, we use No_KP_Baru as unique identifier
