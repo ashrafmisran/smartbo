@@ -260,7 +260,8 @@ class TelecallPengundi extends ViewRecord
                                                          str_contains(strtolower(request()->header('User-Agent')), 'android') ||
                                                          str_contains(strtolower(request()->header('User-Agent')), 'iphone'))) {
                                                         
-                                                        $this->js("window.open('tel:$state', '_self');");
+                                                        $cleanNumber = preg_replace('/[^0-9]/', '', $state);
+                                                        $this->js("window.open('tel:$cleanNumber', '_self');");
                                                     }
 
                                                 } catch (\Exception $e) {
