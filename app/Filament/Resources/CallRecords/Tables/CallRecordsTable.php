@@ -32,11 +32,16 @@ class CallRecordsTable
                     
                 TextColumn::make('phone_number')
                     ->label('Nombor Telefon')
-                    ->url(fn ($record) => "tel:{$record->phone_number}")
+                    ->url(fn ($record) => $record->phone_number ? "tel:{$record->phone_number}" : null)
                     ->searchable()
                     ->badge()
                     ->sortable(),
-                    
+                    TextColumn::make('phone_number')
+                        ->label('Nombor Telefon')
+                        ->url(fn ($record) => $record->phone_number ? "tel:" . preg_replace('/\D/', '', $record->phone_number) : null)
+                        ->searchable()
+                        ->badge()
+                        ->sortable(),                    
                 TextColumn::make('kod_cula')
                     ->label('Kod Cula')
                     ->badge()
