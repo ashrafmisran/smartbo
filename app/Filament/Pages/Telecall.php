@@ -40,6 +40,7 @@ class Telecall extends Page implements
     public ?string $dun_id = null;
     public ?string $daerah_id = null;
     public ?string $lokaliti_id = null;
+    public ?string $kategori_cula = null;
     
     // Flag to control when to show results
     public bool $showResults = false;
@@ -92,6 +93,24 @@ class Telecall extends Page implements
             $query->where('Kod_Lokaliti', $this->padLokalitiCode($this->lokaliti_id));
         }
 
+        // Filter by kategori cula
+        if($this->kategori_cula){
+
+            $query->where(function ($q) {
+                $q->whereNull('Kod_Cula')
+                    ->orWhere('Kod_Cula', '');
+            });
+
+            // Additional filtering by bangsa within belum cula
+            if ($this->kategori_cula === 'Belum Cula Melayu') {
+                $query->where('Keturunan','M');
+            }
+            
+            if ($this->kategori_cula === 'Belum Cula Bukan Melayu') {
+                $query->where('Keturunan', '!=','M');
+            }
+        }
+
         // Only include records that have at least one phone number
         return $query ;//->whereHas('Tel_Bimbit')->orWhereHas('Tel_Rumah');
     }
@@ -106,6 +125,26 @@ class Telecall extends Page implements
                 ->schema([
                     Grid::make()
                         ->schema([
+                            Select::make('kategori_cula')
+                                ->label('Kategori Cula')
+                                ->options([
+                                    'SEMUA'=>'Semua',
+                                    'Belum Cula Melayu'=>'Belum Cula Melayu',
+                                    'Belum Cula Bukan Melayu'=>'Belum Cula Bukan Melayu'
+                                ])
+                                ->live()
+                                ->required()
+                                ->autoFocus()
+                                ->afterStateUpdated(function () {
+                                    $this->showResults = false;
+                                    $this->randomIds = [];
+                                })
+                                ->placeholder('Pilih Kategori Cula')
+                                ->searchable()
+                                ->preload()
+                                ->autoFocus()
+                                ->columnSpan(3),
+
                             Select::make('dun_id')
                                 ->label('DUN')
                                 ->options($dunOptions)
@@ -114,7 +153,6 @@ class Telecall extends Page implements
                                 ->preload()
                                 ->required()
                                 ->live()
-                                ->autoFocus()
                                 ->afterStateUpdated(function ($state, callable $set) {
                                     $set('daerah_id', null);
                                     $set('lokaliti_id', null);
@@ -191,7 +229,6 @@ class Telecall extends Page implements
                                     PageAction::make('generate')
                                         ->icon('heroicon-o-arrow-right-circle')
                                         ->color('success')
-                                        ->iconButton()
                                         ->label('Jana')
                                         ->size('lg')
                                         ->visible(fn () => $this->dun_id !== null)
@@ -199,7 +236,7 @@ class Telecall extends Page implements
                                             // Pick 5 random IDs once
                                             $this->randomIds = $this->buildFilteredPengundiQuery()
                                                 ->inRandomOrder()
-                                                ->limit(5)
+                                                ->limit(1)
                                                 ->pluck('No_KP_Baru')
                                                 ->all();
 
@@ -207,9 +244,9 @@ class Telecall extends Page implements
                                             $this->resetTable();
                                         }),
                                 ])
-                                ->columnSpan(1)
+                                ->columnSpanFull()
                         ])
-                        ->columns(10)
+                        ->columns(12)
 
                 ]),
         ];
@@ -294,40 +331,22 @@ class Telecall extends Page implements
 
     protected function getTableEmptyStateDescription(): ?string
     {
-        return 'Pilih DUN dan klik "Jana" untuk melihat 5 pengundi rawak.';
+        return 'Klik "Jana" semula untuk dapatkan pengundi rawak.';
     }
 
     // Mount method to initialize form
     public function mount(): void
     {
-        $this->form->fill([]);
+        $this->kategori_cula = 'SEMUA';
+        $this->form->fill([
+            'kategori_cula' => 'SEMUA'
+        ]);
     }
-
     // Page header actions
     protected function getHeaderActions(): array
     {
         return [
-            PageAction::make('regenerate')
-                ->icon('heroicon-o-arrow-path')
-                ->color('info')
-                ->label('Jana Semula')
-                ->visible(fn () => $this->showResults && $this->dun_id)
-                ->action(function () {
-                    // Re-pick 5 random IDs quickly
-                    $this->randomIds = $this->buildFilteredPengundiQuery()
-                        ->inRandomOrder()
-                        ->limit(5)
-                        ->pluck('No_KP_Baru')
-                        ->all();
-
-                    $this->resetTable();
-                    
-                    Notification::make()
-                        ->success()
-                        ->title('Pengundi rawak dijana semula')
-                        ->body('5 pengundi rawak baharu telah dijana')
-                        ->send();
-                }),
+            //
         ];
     }
 }
