@@ -9,8 +9,11 @@ use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\BooleanColumn;
 use Filament\Tables\Columns\Layout\Split;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Actions\Action;
 use App\Models\User;
+use App\Models\Kawasan;
+use Carbon\Carbon;
 
 class UsersTable
 {
@@ -82,7 +85,73 @@ class UsersTable
                 ->from('md')
             ])
             ->filters([
-                //
+                SelectFilter::make('kawasan')
+                    ->label('Kawasan')
+                    ->relationship('divisionKawasan', 'name')
+                    ->searchable()
+                    ->options(function () {
+                        return Kawasan::orderBy('name')
+                            ->pluck('name', 'id');
+                    })
+                    ->visible(fn () => auth()->user()?->is_superadmin),
+                SelectFilter::make('is_admin')
+                    ->label('Role')
+                    ->options([
+                        '1' => 'Admin',
+                        '0' => 'Pengguna',
+                    ])
+                    ->query(function ($query, $data) {
+                        if ($data['value'] !== null) {
+                            $query->where('is_admin', $data['value']);
+                        }
+                    }),
+                SelectFilter::make('status')
+                    ->label('Status')
+                    ->options([
+                        'pending' => 'Tunggu pengesahan',
+                        'verified' => 'Disahkan',
+                        'suspended' => 'Digantung',
+                    ]),
+                SelectFilter::make('registered_on')
+                    ->label('Daftar pada')
+                    ->options([
+                        'today' => 'Hari ini',
+                        'yesterday' => 'Semalam',
+                        'this_week' => 'Minggu ini',
+                        'this_month' => 'Bulan ini',
+                        'last_month' => 'Bulan lepas',
+                    ])
+                    ->query(function ($query, $data) {
+                        if (!$data['value']) {
+                            return;
+                        }
+
+                        $now = Carbon::now();
+                        
+                        switch ($data['value']) {
+                            case 'today':
+                                $query->whereDate('created_at', $now->toDateString());
+                                break;
+                            case 'yesterday':
+                                $query->whereDate('created_at', $now->subDay()->toDateString());
+                                break;
+                            case 'this_week':
+                                $query->whereBetween('created_at', [
+                                    $now->startOfWeek()->toDateString(),
+                                    $now->endOfWeek()->toDateString()
+                                ]);
+                                break;
+                            case 'this_month':
+                                $query->whereMonth('created_at', $now->month)
+                                      ->whereYear('created_at', $now->year);
+                                break;
+                            case 'last_month':
+                                $lastMonth = $now->subMonth();
+                                $query->whereMonth('created_at', $lastMonth->month)
+                                      ->whereYear('created_at', $lastMonth->year);
+                                break;
+                        }
+                    }),
             ])
             ->recordActions([
                 EditAction::make()
