@@ -326,7 +326,8 @@ class TelecallPengundi extends ViewRecord
                                 TextEntry::make('Catatan')
                                     ->label('Catatan')
                                     ->placeholder('Tiada catatan')
-                                    ->limit(100)
+                                    //->limit(100)
+                                    ->html(true)
                                     ->color('gray'),
                                 
                                     Action::make('edit_culaan')
@@ -355,13 +356,13 @@ class TelecallPengundi extends ViewRecord
                                                 
                                             Textarea::make('catatan')
                                                 ->label('Catatan')
-                                                ->rows(3)
+                                                ->rows(7)
                                                 ->placeholder('Masukkan catatan...'),
                                         ])
                                         ->fillForm(function () {
                                             return [
                                                 'kod_cula' => $this->record->Kod_Cula ?? '',
-                                                'catatan' => $this->record->Catatan ?? '',
+                                                'catatan' => $this->record->Catatan."\n"."- VCC@".now()->format('Y-m-d').": Tiada" ?? '',
                                             ];
                                         })
                                         ->action(function (array $data) {
