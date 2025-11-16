@@ -48,10 +48,7 @@ class BoPanelProvider extends PanelProvider
             ->globalSearchKeyBindings(['command+k', 'ctrl+k'])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->widgets([
-                //AccountWidget::class,
                 StatsOverview::class,
-                AccountOverview::class,
-                //FilamentInfoWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,
