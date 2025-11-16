@@ -94,25 +94,36 @@ class Telecall extends Page implements
         }
 
         // Filter by kategori cula
-        if($this->kategori_cula){
-
+        if ($this->kategori_cula) {
             $query->where(function ($q) {
                 $q->whereNull('Kod_Cula')
-                    ->orWhere('Kod_Cula', '');
+                    ->orWhere('Kod_Cula', '')
+                    ->orWhere('Kod_Cula', '-');
             });
 
             // Additional filtering by bangsa within belum cula
             if ($this->kategori_cula === 'Belum Cula Melayu') {
-                $query->where('Keturunan','M');
+                $query->where('Keturunan', 'M');
             }
             
             if ($this->kategori_cula === 'Belum Cula Bukan Melayu') {
-                $query->where('Keturunan', '!=','M');
+                $query->where('Keturunan', '!=', 'M');
             }
         }
 
-        // Only include records that have at least one phone number
-        return $query ;//->whereHas('Tel_Bimbit')->orWhereHas('Tel_Rumah');
+        // IMPORTANT: Apply phone number filter HERE to ensure consistent results
+        $query->whereHas('bancian', function ($bancianQuery) {
+            $bancianQuery->where(function ($phoneQuery) {
+                $phoneQuery->whereNotNull('Tel_Bimbit')
+                          ->where('Tel_Bimbit', '!=', '')
+                          ->orWhere(function ($rumahQuery) {
+                              $rumahQuery->whereNotNull('Tel_Rumah')
+                                        ->where('Tel_Rumah', '!=', '');
+                          });
+            });
+        });
+
+        return $query;
     }
 
     // Form schema for filters
@@ -128,13 +139,12 @@ class Telecall extends Page implements
                             Select::make('kategori_cula')
                                 ->label('Kategori Cula')
                                 ->options([
-                                    'SEMUA'=>'Semua',
-                                    'Belum Cula Melayu'=>'Belum Cula Melayu',
-                                    'Belum Cula Bukan Melayu'=>'Belum Cula Bukan Melayu'
+                                    'SEMUA' => 'Semua',
+                                    'Belum Cula Melayu' => 'Belum Cula Melayu',
+                                    'Belum Cula Bukan Melayu' => 'Belum Cula Bukan Melayu'
                                 ])
                                 ->live()
                                 ->required()
-                                ->autoFocus()
                                 ->afterStateUpdated(function () {
                                     $this->showResults = false;
                                     $this->randomIds = [];
@@ -142,7 +152,6 @@ class Telecall extends Page implements
                                 ->placeholder('Pilih Kategori Cula')
                                 ->searchable()
                                 ->preload()
-                                ->autoFocus()
                                 ->columnSpan(3),
 
                             Select::make('dun_id')
@@ -231,10 +240,25 @@ class Telecall extends Page implements
                                         ->color('success')
                                         ->label('Jana')
                                         ->size('lg')
-                                        ->visible(fn () => $this->dun_id !== null)
+                                        ->visible(fn () => $this->dun_id !== null && $this->kategori_cula !== null)
                                         ->action(function () {
-                                            // Pick 5 random IDs once
-                                            $this->randomIds = $this->buildFilteredPengundiQuery()
+                                            // Get the filtered query
+                                            $filteredQuery = $this->buildFilteredPengundiQuery();
+                                            
+                                            // Check total available before picking random
+                                            $totalAvailable = $filteredQuery->count();
+                                            
+                                            if ($totalAvailable === 0) {
+                                                Notification::make()
+                                                    ->warning()
+                                                    ->title('Tiada pengundi dijumpai')
+                                                    ->body('Tiada pengundi Melayu yang belum dihubungi dalam kawasan yang dipilih.')
+                                                    ->send();
+                                                return;
+                                            }
+                                            
+                                            // Pick 1 random ID
+                                            $this->randomIds = $filteredQuery
                                                 ->inRandomOrder()
                                                 ->limit(1)
                                                 ->pluck('No_KP_Baru')
@@ -242,6 +266,13 @@ class Telecall extends Page implements
 
                                             $this->showResults = true;
                                             $this->resetTable();
+                                            
+                                            $count = count($this->randomIds);
+                                            Notification::make()
+                                                ->success()
+                                                ->title('Pengundi dijana')
+                                                ->body("{$count} pengundi rawak dijana dari {$totalAvailable} pengundi yang memenuhi kriteria.")
+                                                ->send();
                                         }),
                                 ])
                                 ->columnSpanFull()
@@ -337,9 +368,11 @@ class Telecall extends Page implements
     // Mount method to initialize form
     public function mount(): void
     {
-        $this->kategori_cula = 'SEMUA';
         $this->form->fill([
-            'kategori_cula' => 'SEMUA'
+            'kategori_cula' => null,
+            'dun_id' => null,
+            'daerah_id' => null,
+            'lokaliti_id' => null,
         ]);
     }
     // Page header actions
