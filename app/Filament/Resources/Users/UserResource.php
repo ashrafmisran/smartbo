@@ -25,6 +25,11 @@ class UserResource extends BaseResource
     // Disable tenant scoping for this resource
     protected static bool $isScopedToTenant = false;
 
+    public static function getLabel(): string
+    {
+        return 'Pengguna';
+    }
+
     public static function form(Schema $schema): Schema
     {
         return UserForm::configure($schema);
@@ -46,8 +51,8 @@ class UserResource extends BaseResource
     {
         return [
             'index' => ListUsers::route('/'),
-            'create' => CreateUser::route('/create'),
-            'edit' => EditUser::route('/{record}/edit'),
+            //'create' => CreateUser::route('/create'),
+            //'edit' => EditUser::route('/{record}/edit'),
         ];
     }
 

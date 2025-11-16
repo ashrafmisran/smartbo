@@ -33,14 +33,23 @@ class UsersTable
                     ->searchable()
                     ->sortable()
                     ->badge()
+                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                        'pending' => 'Tunggu pengesahan',
+                        'verified' => 'Disahkan',
+                        'suspended' => 'Digantung',
+                        default => $state,
+                    })
                     ->color(fn (string $state): string => match ($state) {
                         'pending' => 'gray',
                         'verified' => 'success',
                         'suspended' => 'danger',
                         default => 'gray',
                     }),
-                BooleanColumn::make('is_admin')
-                    ->label('Admin')
+                TextColumn::make('is_admin')
+                    ->label('Role')
+                    ->formatStateUsing(fn (bool $state): string => $state ? 'Admin' : 'Pengguna')
+                    ->badge()
+                    ->color(fn (bool $state): string => $state ? 'success' : 'gray')
                     ->sortable(),
             ])
             ->filters([
@@ -57,16 +66,17 @@ class UsersTable
                     ->icon('heroicon-o-check-circle')
                     ->color('success')
                     ->visible(fn ($record) => $record->status == 'pending'),
-                Action::make('Gantung pengguna')
+                Action::make('Gantung')
                     ->action(function ($record) {
                         User::find($record->id)->update(['status' => 'suspended']);
+                        User::find($record->id)->update(['is_admin' => false]);
                     })
-                    ->label('Gantung pengguna')
+                    ->label('Gantung')
                     ->icon('heroicon-o-x-circle')
                     ->color('warning')
                     ->requiresConfirmation()
                     ->visible(fn ($record) => $record->status == 'verified'),
-                Action::make('Aktifkan semula pengguna')
+                Action::make('Aktifkan semula')
                     ->action(function ($record) {
                         User::find($record->id)->update(['status' => 'verified']);
                     })
@@ -84,7 +94,7 @@ class UsersTable
                     ->color('success')
                     ->requiresConfirmation()
                     ->visible(fn ($record) => !$record->is_admin && $record->status == 'verified'),
-                Action::make('Tamatkan peranan admin')
+                Action::make('Pecat admin')
                     ->action(function ($record) {
                         User::find($record->id)->update(['is_admin' => false]);
                     })
