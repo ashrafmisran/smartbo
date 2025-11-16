@@ -24,15 +24,38 @@ class StatsOverview extends StatsOverviewWidget
 
         // Add admin-only user statistics
         if (auth()->user()?->is_admin) {
+            // Get user statistics with state filtering
+            $pendingQuery = User::where('status', 'pending');
+            $verifiedQuery = User::where('status', 'verified');
+            
+            // Apply state filtering for non-superadmin users
+            if (!auth()->user()?->is_superadmin) {
+                $currentUserState = auth()->user()?->divisionKawasan?->negeri;
+                
+                if ($currentUserState) {
+                    $pendingQuery->whereHas('divisionKawasan', function ($q) use ($currentUserState) {
+                        $q->where('negeri', $currentUserState);
+                    });
+                    
+                    $verifiedQuery->whereHas('divisionKawasan', function ($q) use ($currentUserState) {
+                        $q->where('negeri', $currentUserState);
+                    });
+                } else {
+                    // If user has no state, show 0 counts
+                    $pendingQuery->whereRaw('1 = 0');
+                    $verifiedQuery->whereRaw('1 = 0');
+                }
+            }
+            
             $adminStats = [
                 Stat::make('Pengguna Menunggu Pengesahan', 
-                    User::where('status', 'pending')->count())
+                    $pendingQuery->count())
                     ->description('Bilangan pengguna menunggu kelulusan admin.')
                     ->descriptionIcon('heroicon-o-clock')
                     ->color('warning'),
                 
                 Stat::make('Pengguna Disahkan', 
-                    User::where('status', 'verified')->count())
+                    $verifiedQuery->count())
                     ->description('Bilangan pengguna yang telah disahkan.')
                     ->descriptionIcon('heroicon-o-check-circle')
                     ->color('success'),
