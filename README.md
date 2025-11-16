@@ -1,61 +1,212 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# SmartBO - Sistem Panggilan Pengundi
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Aplikasi web untuk pengurusan panggilan telefon kepada pengundi menggunakan Laravel, Filament, dan Livewire.
 
-## About Laravel
+## 📋 Tentang Projek
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+SmartBO adalah sistem pengurusan yang membolehkan:
+- Rekod panggilan telefon kepada pengundi
+- Pengurusan pengguna dengan sistem kelulusan admin
+- Dashboard dengan statistik masa nyata
+- Kawalan akses berdasarkan status pengguna
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## 🚀 Teknologi Yang Digunakan
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- **Laravel 11** - Framework PHP
+- **Filament v4** - Panel admin
+- **Livewire** - Komponen dinamik
+- **MySQL** - Database utama
+- **Tailwind CSS** - Styling
+- **Heroicons** - Ikon
 
-## Learning Laravel
+## 📦 Keperluan Sistem
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+- PHP 8.2+
+- Composer
+- Node.js & NPM
+- MySQL 8.0+
+- Laravel Sail (untuk pembangunan)
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+## ⚡ Pemasangan
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### 1. Clone Repository
+```bash
+git clone https://github.com/ashrafmisran/smartbo.git
+cd smartbo
+```
 
-## Laravel Sponsors
+### 2. Setup Environment
+```bash
+cp .env.example .env
+composer install
+npm install
+```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+### 3. Database Setup
+```bash
+# Edit .env file dengan maklumat database anda
+php artisan key:generate
+php artisan migrate --seed
+```
 
-### Premium Partners
+### 4. Jalankan Aplikasi
+```bash
+# Development
+php artisan serve
+npm run dev
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+# Atau dengan Laravel Sail
+./vendor/bin/sail up -d
+./vendor/bin/sail artisan migrate --seed
+```
 
-## Contributing
+## 👥 Sistem Pengguna
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### Status Pengguna:
+- **Pending** - Menunggu kelulusan admin
+- **Verified** - Disahkan dan boleh akses sistem
+- **Suspended** - Digantung dari sistem
 
-## Code of Conduct
+### Peranan Pengguna:
+- **Pengguna Biasa** - Boleh rekod panggilan sendiri
+- **Admin** - Boleh urus semua pengguna dan lihat statistik
+- **Super Admin** - Akses penuh sistem
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## 📊 Ciri-ciri Utama
 
-## Security Vulnerabilities
+### Dashboard Statistik
+- Nombor telah dihubungi (untuk semua pengguna)
+- Pengguna menunggu pengesahan (admin sahaja)
+- Pengguna disahkan (admin sahaja)
+- Pengguna digantung (admin sahaja)
+- Jumlah pengguna (admin sahaja)
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### Pengurusan Rekod Panggilan
+- Rekod panggilan dengan kod cula
+- Filter berdasarkan pengguna
+- Carian global pengundi
+- Nota panggilan
 
-## License
+### Pengurusan Pengguna (Admin)
+- Sahkan/tolak pendaftaran pengguna
+- Gantung/aktifkan pengguna
+- Lantik/pecat admin
+- Lihat maklumat kawasan keahlian
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## 🔧 Konfigurasi
+
+### Database Connections
+Sistem menyokong multiple database connections:
+- **Default**: Database utama aplikasi
+- **SSDP**: Database pengundi (read-only)
+
+### Email Configuration
+Setup email untuk notifikasi dalam `.env`:
+```env
+MAIL_MAILER=smtp
+MAIL_HOST=your-smtp-host
+MAIL_PORT=587
+MAIL_USERNAME=your-email
+MAIL_PASSWORD=your-password
+```
+
+### Filament Configuration
+Panel admin boleh diakses di `/bo` dengan kustomisasi:
+- Tema gelap/terang
+- Navigasi sidebar/topbar
+- Widget dashboard
+
+## 🛠️ Pembangunan
+
+### Struktur Folder Utama
+```
+app/
+├── Filament/           # Panel admin dan resources
+├── Http/Controllers/   # Controllers
+├── Livewire/          # Komponen Livewire
+├── Models/            # Eloquent models
+└── Services/          # Business logic
+
+database/
+├── migrations/        # Database migrations
+└── seeders/          # Data seeders
+
+resources/
+├── css/              # Styling files
+├── js/               # JavaScript files
+└── views/            # Blade templates
+```
+
+### Artisan Commands
+```bash
+# Generate resources baru
+php artisan make:filament-resource ModelName
+
+# Generate widget
+php artisan make:filament-widget WidgetName
+
+# Generate page
+php artisan make:filament-page PageName
+```
+
+## 🚦 Testing
+
+```bash
+# Jalankan semua test
+php artisan test
+
+# Test dengan coverage
+php artisan test --coverage
+
+# Test specific feature
+php artisan test --filter=UserRegistrationTest
+```
+
+## 📝 API Documentation
+
+API endpoints tersedia untuk:
+- Authentication
+- User management
+- Call records
+- Statistics
+
+Dokumentasi lengkap boleh diakses di `/api/documentation` (jika diaktifkan).
+
+## 🔒 Keselamatan
+
+- Authentication menggunakan session Laravel
+- Autoriti berdasarkan peranan pengguna
+- Validation input pada semua form
+- CSRF protection
+- Rate limiting pada login
+
+## 📈 Performance
+
+- Database query optimization
+- Lazy loading untuk relationships
+- Cache untuk data yang kerap diakses
+- Real-time updates dengan polling
+
+## 🤝 Contributing
+
+1. Fork repository
+2. Cipta branch baru (`git checkout -b feature/AmazingFeature`)
+3. Commit perubahan (`git commit -m 'Add some AmazingFeature'`)
+4. Push ke branch (`git push origin feature/AmazingFeature`)
+5. Buka Pull Request
+
+## 📞 Support
+
+Jika ada sebarang masalah atau soalan:
+- Buka [Issue](https://github.com/ashrafmisran/smartbo/issues)
+- Email: [ashrafmisran@gmail.com](mailto:ashrafmisran@gmail.com)
+
+## 📄 License
+
+Projek ini adalah open source di bawah [MIT License](LICENSE).
+
+---
+
+**Versi:** 1.0.0  
+**Status:** Active Development  
+**Dibangunkan oleh:** Muhammad Ashraf bin Misran
