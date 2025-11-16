@@ -72,6 +72,10 @@ class UsersTable
                         ->badge()
                         ->color(fn (bool $state): string => $state ? 'success' : 'gray')
                         ->sortable(),
+                    TextColumn::make('created_at')
+                        ->label('Masa Daftar')
+                        ->since()
+                        ->sortable(),
 
                 ])
                 ->from('md')
