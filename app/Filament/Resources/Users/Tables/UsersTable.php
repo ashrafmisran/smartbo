@@ -35,6 +35,7 @@ class UsersTable
                             $query->whereRaw('1 = 0');
                         }
                     })
+                    ->orderBy('created_at', 'desc')
             )
             ->columns([
                 Split::make([
