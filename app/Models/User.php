@@ -11,6 +11,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Collection;
 use App\Models\Database;
+use App\Models\Kawasan;
 use Filament\Models\Contracts\FilamentUser;
 
 class User extends Authenticatable implements FilamentUser //implements HasTenants
@@ -61,7 +62,7 @@ class User extends Authenticatable implements FilamentUser //implements HasTenan
         return $this->belongsToMany(Database::class, 'database_user');
     }
 
-    public function division()
+    public function divisionKawasan()
     {
         return $this->belongsTo(Kawasan::class, 'division', 'id');
     }
