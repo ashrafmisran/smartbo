@@ -8,6 +8,7 @@ use Filament\Actions\EditAction;
 use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\BooleanColumn;
+use Filament\Tables\Columns\Layout\Split;
 use Filament\Actions\Action;
 use App\Models\User;
 
@@ -18,39 +19,44 @@ class UsersTable
         return $table
             ->query(User::query()->where('is_superadmin', false))
             ->columns([
-                TextColumn::make('name')
-                    ->label('Name')
-                    ->description(fn ($record) => $record->email)
-                    ->searchable()
-                    ->sortable(),
-                TextColumn::make('divisionKawasan.name')
-                    ->label('Kawasan')
-                    ->searchable()
-                    ->description(fn ($record) => $record->pas_membership_no)
-                    ->sortable(),
-                TextColumn::make('status')
-                    ->label('Status')
-                    ->searchable()
-                    ->sortable()
-                    ->badge()
-                    ->formatStateUsing(fn (string $state): string => match ($state) {
-                        'pending' => 'Tunggu pengesahan',
-                        'verified' => 'Disahkan',
-                        'suspended' => 'Digantung',
-                        default => $state,
-                    })
-                    ->color(fn (string $state): string => match ($state) {
-                        'pending' => 'gray',
-                        'verified' => 'success',
-                        'suspended' => 'danger',
-                        default => 'gray',
-                    }),
-                TextColumn::make('is_admin')
-                    ->label('Role')
-                    ->formatStateUsing(fn (bool $state): string => $state ? 'Admin' : 'Pengguna')
-                    ->badge()
-                    ->color(fn (bool $state): string => $state ? 'success' : 'gray')
-                    ->sortable(),
+                Split::make([
+
+                    TextColumn::make('name')
+                        ->label('Name')
+                        ->description(fn ($record) => $record->email)
+                        ->searchable()
+                        ->sortable(),
+                    TextColumn::make('divisionKawasan.name')
+                        ->label('Kawasan')
+                        ->searchable()
+                        ->description(fn ($record) => $record->pas_membership_no)
+                        ->sortable(),
+                    TextColumn::make('status')
+                        ->label('Status')
+                        ->searchable()
+                        ->sortable()
+                        ->badge()
+                        ->formatStateUsing(fn (string $state): string => match ($state) {
+                            'pending' => 'Tunggu pengesahan',
+                            'verified' => 'Disahkan',
+                            'suspended' => 'Digantung',
+                            default => $state,
+                        })
+                        ->color(fn (string $state): string => match ($state) {
+                            'pending' => 'gray',
+                            'verified' => 'success',
+                            'suspended' => 'danger',
+                            default => 'gray',
+                        }),
+                    TextColumn::make('is_admin')
+                        ->label('Role')
+                        ->formatStateUsing(fn (bool $state): string => $state ? 'Admin' : 'Pengguna')
+                        ->badge()
+                        ->color(fn (bool $state): string => $state ? 'success' : 'gray')
+                        ->sortable(),
+
+                ])
+                ->from('md')
             ])
             ->filters([
                 //
