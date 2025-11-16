@@ -23,7 +23,22 @@ class UsersTable
                     ->description(fn ($record) => $record->email)
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('status'),
+                TextColumn::make('divisionKawasan.name')
+                    ->label('Kawasan')
+                    ->searchable()
+                    ->description(fn ($record) => $record->pas_membership_no)
+                    ->sortable(),
+                TextColumn::make('status')
+                    ->label('Status')
+                    ->searchable()
+                    ->sortable()
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'pending' => 'gray',
+                        'verified' => 'success',
+                        'suspended' => 'danger',
+                        default => 'gray',
+                    }),
                 BooleanColumn::make('is_admin')
                     ->label('Admin')
                     ->sortable(),
