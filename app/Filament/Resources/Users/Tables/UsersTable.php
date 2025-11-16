@@ -17,7 +17,25 @@ class UsersTable
     public static function configure(Table $table): Table
     {
         return $table
-            ->query(User::query()->where('is_superadmin', false))
+            ->query(
+                User::query()
+                    ->where('is_superadmin', false)
+                    ->with('divisionKawasan')
+                    ->when(!auth()->user()?->is_superadmin, function ($query) {
+                        // Get the authenticated user's state
+                        $currentUserState = auth()->user()?->divisionKawasan?->negeri;
+                        
+                        if ($currentUserState) {
+                            // Filter users to same state as authenticated user
+                            $query->whereHas('divisionKawasan', function ($q) use ($currentUserState) {
+                                $q->where('negeri', $currentUserState);
+                            });
+                        } else {
+                            // If current user has no state assigned, show no users (except for superadmin)
+                            $query->whereRaw('1 = 0');
+                        }
+                    })
+            )
             ->columns([
                 Split::make([
 
