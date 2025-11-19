@@ -157,43 +157,8 @@ class DailyCallRecordsByDunTable extends TableWidget
 
     protected function getDunList(): array
     {
-        $dunQuery = Dun::query();
-        
-        if (!auth()->user()?->is_superadmin) {
-            $currentUserState = auth()->user()?->divisionKawasan?->negeri;
-            
-            if ($currentUserState) {
-                // Map state names to state codes for DUN filtering
-                $stateCodeMap = [
-                    'Johor' => '01',
-                    'Kedah' => '02',
-                    'Kelantan' => '03',
-                    'Melaka' => '04',
-                    'Negeri Sembilan' => '05',
-                    'Pahang' => '06',
-                    'Perak' => '08',
-                    'Perlis' => '09',
-                    'Pulau Pinang' => '07',
-                    'Sabah' => '12',
-                    'Sarawak' => '13',
-                    'Selangor' => '10',
-                    'Terengganu' => '11',
-                    'Wilayah Persekutuan' => '14'
-                ];
-                
-                $stateCode = $stateCodeMap[$currentUserState] ?? null;
-                
-                if ($stateCode) {
-                    $dunQuery->where('Kod_Negeri', $stateCode);
-                } else {
-                    return [];
-                }
-            } else {
-                return [];
-            }
-        }
-
-        return $dunQuery
+        // Remove state filtering - all admins can see all DUNs
+        return Dun::query()
             ->orderBy('Kod_DUN')
             ->pluck('Nama_DUN', 'Kod_DUN')
             ->toArray();

@@ -62,6 +62,8 @@ class StatsOverview extends StatsOverviewWidget
             ];
             
             $stats = array_merge($stats, $adminStats);
+
+            
         }
 
         return $stats;
