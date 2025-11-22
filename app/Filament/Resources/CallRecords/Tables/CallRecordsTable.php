@@ -156,7 +156,7 @@ class CallRecordsTable
                 Action::make('download')
                     ->label('Muat Turun CSV')
                     ->icon('heroicon-o-arrow-down-tray')
-                    ->color('success')
+                    ->color('gray')
                     ->action(function () {
                         $csvContent = static::generateCsvContent();
                         $filename = 'rekod-panggilan-' . now()->format('Y-m-d-His') . '.csv';
