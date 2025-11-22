@@ -6,6 +6,7 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
+use Filament\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Tables\Filters\SelectFilter;
@@ -13,6 +14,7 @@ use Filament\Tables\Columns\Layout\Split;
 use Filament\Tables\Filters\Filter;
 use Filament\Forms\Components\DatePicker;
 use Illuminate\Database\Eloquent\Builder;
+use App\Models\CallRecord;
 
 class CallRecordsTable
 {
@@ -151,9 +153,96 @@ class CallRecordsTable
             //         ),
             // ])
             ->toolbarActions([
+                Action::make('download')
+                    ->label('Muat Turun CSV')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->color('success')
+                    ->action(function () {
+                        $csvContent = static::generateCsvContent();
+                        $filename = 'rekod-panggilan-' . now()->format('Y-m-d-His') . '.csv';
+                        
+                        return response()->streamDownload(function () use ($csvContent) {
+                            echo $csvContent;
+                        }, $filename, [
+                            'Content-Type' => 'text/csv',
+                            'Content-Disposition' => 'attachment',
+                        ]);
+                    })
+                    ->authorize(fn (): bool => auth()->user()->status !== 'pending'),
                 // BulkActionGroup::make([
                 //     DeleteBulkAction::make(),
                 // ]),
             ]);
+    }
+
+    protected static function generateCsvContent(): string
+    {
+        // Get records with same access control as table
+        $query = CallRecord::with('user');
+        
+        // Apply access control - non-admin users only see their records
+        if (!auth()->user()?->is_admin) {
+            $query->where('user_id', auth()->id());
+        }
+        
+        $records = $query->orderBy('called_at', 'desc')->get();
+        
+        // Create CSV content
+        $csvData = [];
+        
+        // Headers in Malay
+        $headers = [
+            'Nama User',
+            'IC Pengundi',
+            'Nombor Telefon',
+            'Kod Cula',
+            'Makna Cula',
+            'Catatan',
+            'Masa Panggilan',
+            'Tarikh Rekod'
+        ];
+        
+        $csvData[] = $headers;
+        
+        // Add data rows
+        foreach ($records as $record) {
+            $csvData[] = [
+                $record->user?->name ?? '',
+                $record->pengundi_ic ?? '',
+                $record->phone_number ?? '',
+                $record->kod_cula ?? '',
+                static::getCulaMeaning($record->kod_cula),
+                $record->notes ?? '',
+                $record->called_at?->format('d/m/Y H:i') ?? '',
+                $record->created_at?->format('d/m/Y H:i') ?? '',
+            ];
+        }
+        
+        // Generate CSV string
+        $csvContent = '';
+        foreach ($csvData as $row) {
+            $csvContent .= '"' . implode('","', str_replace('"', '""', $row)) . '"' . "\r\n";
+        }
+        
+        return $csvContent;
+    }
+    
+    protected static function getCulaMeaning($kodCula): string
+    {
+        return match ($kodCula) {
+            'VA' => 'Atas Pagar',
+            'VB' => 'Undi Bulan',
+            'VC' => 'Condong Bulan',
+            'VD' => 'BN',
+            'VN' => 'PH',
+            'VS' => 'PN',
+            'VT' => 'Rakan PN',
+            'VR' => 'GRS',
+            'VW' => 'Salah nombor',
+            'VX' => 'Tiada jawapan',
+            'VY' => 'Enggan respon',
+            'VZ' => 'Benci politik',
+            default => $kodCula ?? '',
+        };
     }
 }
