@@ -21,6 +21,7 @@ class CallRecordsTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->query(static::getFilteredQuery())
             ->columns([
                 Split::make([
 
@@ -175,17 +176,38 @@ class CallRecordsTable
             ]);
     }
 
+    protected static function getFilteredQuery(): Builder
+    {
+        $query = CallRecord::query()->with('user');
+        
+        // Apply state-based access control
+        if (!auth()->user()?->is_admin) {
+            // Regular users - only their own records
+            $query->where('user_id', auth()->id());
+        } elseif (!auth()->user()?->is_superadmin) {
+            // Regular admins - only users from same state
+            $currentUserState = auth()->user()?->divisionKawasan?->negeri;
+            
+            if ($currentUserState) {
+                $query->whereHas('user.divisionKawasan', function ($q) use ($currentUserState) {
+                    $q->where('negeri', $currentUserState);
+                });
+            } else {
+                // If admin has no state, show no records
+                $query->whereRaw('1 = 0');
+            }
+        }
+        // Superadmins see all records (no additional filtering)
+        
+        return $query;
+    }
+
     protected static function generateCsvContent(): string
     {
-        // Get records with same access control as table
-        $query = CallRecord::with('user');
-        
-        // Apply access control - non-admin users only see their records
-        if (!auth()->user()?->is_admin) {
-            $query->where('user_id', auth()->id());
-        }
-        
-        $records = $query->orderBy('called_at', 'desc')->get();
+        // Use same filtered query as table
+        $records = static::getFilteredQuery()
+            ->orderBy('called_at', 'desc')
+            ->get();
         
         // Create CSV content
         $csvData = [];
