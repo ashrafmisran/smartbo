@@ -93,21 +93,32 @@ class Telecall extends Page implements
             $query->where('Kod_Lokaliti', $this->padLokalitiCode($this->lokaliti_id));
         }
 
-        // Filter by kategori cula
+       // Filter by kategori cula
         if ($this->kategori_cula) {
-            $query->where(function ($q) {
-                $q->whereNull('Kod_Cula')
-                    ->orWhere('Kod_Cula', '')
-                    ->orWhere('Kod_Cula', '-');
-            });
 
-            // Additional filtering by bangsa within belum cula
-            if ($this->kategori_cula === 'Belum Cula Melayu') {
-                $query->where('Keturunan', 'M');
+            if (in_array($this->kategori_cula, ['Belum Cula', 'Belum Cula Melayu', 'Belum Cula Bukan Melayu'])) {
+                $query->where(function ($q) {
+                    $q->whereNull('Kod_Cula')
+                        ->orWhere('Kod_Cula', '')
+                        ->orWhere('Kod_Cula', '-');
+                });
+
+                // Additional filtering by bangsa within belum cula
+                if ($this->kategori_cula === 'Belum Cula Melayu') {
+                    $query->where('Keturunan', 'M');
+                }
+
+                if ($this->kategori_cula === 'Belum Cula Bukan Melayu') {
+                    $query->where('Keturunan', '!=', 'M');
+                }
             }
-            
-            if ($this->kategori_cula === 'Belum Cula Bukan Melayu') {
-                $query->where('Keturunan', '!=', 'M');
+
+            if ($this->kategori_cula === 'Pengundi Putih') {
+                $query->whereIn('Kod_Cula', ['B', 'C', 'H']);
+            }
+
+            if ($this->kategori_cula === 'Atas Pagar') {
+                $query->whereIn('Kod_Cula', ['A']);
             }
         }
 
@@ -141,7 +152,9 @@ class Telecall extends Page implements
                                 ->options([
                                     'SEMUA' => 'Semua',
                                     'Belum Cula Melayu' => 'Belum Cula Melayu',
-                                    'Belum Cula Bukan Melayu' => 'Belum Cula Bukan Melayu'
+                                    'Belum Cula Bukan Melayu' => 'Belum Cula Bukan Melayu',
+                                    'Pengundi Putih' => 'Pengundi Putih',
+                                    'Atas Pagar' => 'Atas Pagar',
                                 ])
                                 ->live()
                                 ->required()
