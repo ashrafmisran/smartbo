@@ -143,7 +143,7 @@ class Telecall extends Page implements
     protected function getFormSchema(): array
     {
         $dunOptions = Cache::remember(
-            "dun:" . session('state'),
+            "dun:" . $this->state,
             3600,
             fn () => Dun::orderBy('Kod_DUN')
                 ->get()
@@ -201,7 +201,7 @@ class Telecall extends Page implements
                                     if (!$dunId) {
                                         return [];
                                     }
-                                    $cacheKey = "daerah:" . session('state') . ":{$dunId}";
+                                    $cacheKey = "daerah:" . $this->state . ":{$dunId}";
                                     return Cache::remember($cacheKey, 3600, function () use ($dunId) {
                                         return Daerah::where('Kod_DUN', $dunId)
                                             ->orderBy('Kod_Daerah')
