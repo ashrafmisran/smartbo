@@ -15,7 +15,6 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\Request;
 
 class CallRecordResource extends Resource
 {
@@ -37,8 +36,7 @@ class CallRecordResource extends Resource
 
     public static function getGlobalSearchResultUrl(Model $record): string
     {
-        $state = Request::segment(1); // Get the state from the URL segment
-        return "/{$state}/senarai-pengundi/{$record->pengundi_ic}/telecall";
+        return '/' . session('state') . '/senarai-pengundi/' . $record->pengundi_ic . '/telecall';
     }
 
     public static function getGlobalSearchResultDetails(Model $record): array
