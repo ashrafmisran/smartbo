@@ -22,6 +22,8 @@ use BackedEnum;
 use Filament\Support\Enums\Width;
 use Filament\Infolists\Components\TextEntry;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Request;
+
 
 class Telecall extends Page implements
     Forms\Contracts\HasForms,
@@ -357,7 +359,7 @@ class Telecall extends Page implements
                 ->icon('heroicon-o-phone')
                 ->iconButton()
                 ->color('success')
-                ->url(fn (Pengundi $record) => "/{$state}/senarai-pengundi/{$record->No_KP_Baru}/telecall")
+                ->url(fn (Pengundi $record) => '/' . session('state') . '/senarai-pengundi/' . $record->No_KP_Baru . '/telecall')
                 ->openUrlInNewTab(),
         ];
     }
@@ -381,7 +383,8 @@ class Telecall extends Page implements
     // Mount method to initialize form
     public function mount(): void
     {
-        $state = Request()->segments(1);
+        $state = Request::segment(1);
+        session(['state' => $state]);
         $this->form->fill([
             'kategori_cula' => null,
             'dun_id' => null,
