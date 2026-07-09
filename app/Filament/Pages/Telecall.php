@@ -142,7 +142,7 @@ class Telecall extends Page implements
     // Form schema for filters
     protected function getFormSchema(): array
     {
-        $dunOptions = Cache::remember('dun_options', 3600, fn() => Dun::pluck('Nama_DUN', 'Kod_DUN')->toArray());
+        $dunOptions = Cache::remember('dun_options_' . session('state'), 3600, fn() => Dun::pluck('Nama_DUN', 'Kod_DUN')->toArray());
         
         return [
             Section::make()
@@ -192,7 +192,7 @@ class Telecall extends Page implements
                                     if (!$dunId) {
                                         return [];
                                     }
-                                    $cacheKey = "daerah:{$dunId}";
+                                    $cacheKey = "daerah:" . session('state') . ":{$dunId}";
                                     return Cache::remember($cacheKey, 3600, function () use ($dunId) {
                                         return Daerah::where('Kod_DUN', $dunId)
                                             ->orderBy('Kod_Daerah')
@@ -224,7 +224,7 @@ class Telecall extends Page implements
                                     if (!$dunId) {
                                         return [];
                                     }
-                                    $key = "lokaliti:{$dunId}:" . ($daerahId ?: 'all');
+                                    $key = "lokaliti:" . session('state') . ":{$dunId}:" . ($daerahId ?: 'all');
                                     return Cache::remember($key, 3600, function () use ($dunId, $daerahId) {
                                         $query = Lokaliti::where('Kod_DUN', $dunId);
                                         if ($daerahId) {
