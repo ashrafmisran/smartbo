@@ -39,6 +39,7 @@ class Telecall extends Page implements
     protected string $view = 'filament.pages.random-pengundi';
 
     // Properties to bind selected values
+    public ?string $state = null;
     public ?string $dun_id = null;
     public ?string $daerah_id = null;
     public ?string $lokaliti_id = null;
