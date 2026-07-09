@@ -142,7 +142,16 @@ class Telecall extends Page implements
     // Form schema for filters
     protected function getFormSchema(): array
     {
-        $dunOptions = Cache::remember('dun_options_' . session('state'), 3600, fn() => Dun::pluck('Nama_DUN', 'Kod_DUN')->toArray());
+        $dunOptions = Cache::remember(
+            "dun:" . session('state'),
+            3600,
+            fn () => Dun::orderBy('Kod_DUN')
+                ->get()
+                ->mapWithKeys(fn ($dun) => [
+                    $dun->Kod_DUN => "{$dun->Kod_DUN} - {$dun->Nama_DUN}",
+                ])
+                ->toArray()
+        );
         
         return [
             Section::make()
