@@ -36,7 +36,8 @@ class CallRecordResource extends Resource
 
     public static function getGlobalSearchResultUrl(Model $record): string
     {
-        return "/bo/senarai-pengundi/{$record->pengundi_ic}/telecall";
+        $state = Request::segment(1); // Get the state from the URL segment
+        return "/{$state}/senarai-pengundi/{$record->pengundi_ic}/telecall";
     }
 
     public static function getGlobalSearchResultDetails(Model $record): array
