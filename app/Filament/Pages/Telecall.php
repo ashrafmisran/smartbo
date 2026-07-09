@@ -368,7 +368,7 @@ class Telecall extends Page implements
                 ->icon('heroicon-o-phone')
                 ->iconButton()
                 ->color('success')
-                ->url(fn (Pengundi $record) => '/' . session('state') . '/senarai-pengundi/' . $record->No_KP_Baru . '/telecall')
+                ->url(fn (Pengundi $record) => '/' . $this->state . '/senarai-pengundi/' . $record->No_KP_Baru . '/telecall')
                 ->openUrlInNewTab(),
         ];
     }
@@ -392,8 +392,8 @@ class Telecall extends Page implements
     // Mount method to initialize form
     public function mount(): void
     {
-        $state = Request::segment(1);
-        session(['state' => $state]);
+        $this->state = Request::segment(1);
+        session(['state' => $this->state]);
         $this->form->fill([
             'kategori_cula' => null,
             'dun_id' => null,
