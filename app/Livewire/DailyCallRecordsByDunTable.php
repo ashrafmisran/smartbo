@@ -70,9 +70,9 @@ class DailyCallRecordsByDunTable extends TableWidget
         // Get call records data grouped by date and DUN
         $callData = $this->getCallRecordsData();
         
-        // Generate date range (from 15/11/2025 onwards - latest first)
+        // Generate date range (from 01/07/2026 onwards - latest first)
         $dates = [];
-        $startDate = Carbon::parse('2025-11-15');
+        $startDate = Carbon::parse('2026-07-01');
         $endDate = Carbon::now();
         
         // Calculate days from start date to today
