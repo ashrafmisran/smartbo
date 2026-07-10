@@ -33,6 +33,14 @@ class DailyCallRecordsByDunTable extends TableWidget
                 ->sortable()
                 ->extraAttributes(['class' => 'sticky left-0 bg-white z-10 border-r']),
         ];
+        
+        // Add total column
+        $columns[] = TextColumn::make('total')
+            ->label('Jumlah')
+            ->numeric()
+            ->alignCenter()
+            ->weight('bold')
+            ->color('primary');
 
         // Add a column for each DUN
         foreach ($duns as $dunCode => $dunName) {
@@ -42,14 +50,6 @@ class DailyCallRecordsByDunTable extends TableWidget
                 ->alignCenter()
                 ->formatStateUsing(fn ($state) => $state ?? 0);
         }
-
-        // Add total column
-        $columns[] = TextColumn::make('total')
-            ->label('Jumlah')
-            ->numeric()
-            ->alignCenter()
-            ->weight('bold')
-            ->color('primary');
 
         return $table
             ->records(fn () => $this->getTableData())
