@@ -67,7 +67,7 @@ class TelecallModalSchema
                                 ->options([
                                     'VD' => 'BN',
                                     'VN' => 'PH',
-                                    'VR' => 'GRS',
+                                    'VR' => 'BERSATU',
                                 ])
                                 ->grouped()
                                 ->live(debounce: 0)
@@ -122,7 +122,7 @@ class TelecallModalSchema
         return [
             'VD' => 'BN',
             'VN' => 'PH',
-            'VR' => 'GRS',
+            'VR' => 'BERSATU',
         ];
     }
 
