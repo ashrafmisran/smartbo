@@ -37,7 +37,7 @@ if ($pengundi->Kod_Cula) {
         "VN" => "🚀 PH",
         "VS" => "🪢 PN",
         "VT" => "🪢 Rakan PN",
-        "VR" => "🗻 GRS",
+        "VR" => "🌸 Bersatu",
         "VW" => "❌ Salah nombor",
         "VX" => "📵 Tiada jawapan",
         "VY" => "🙅🏻‍♂️ Enggan respon",
