@@ -120,6 +120,7 @@ class TelecallPengundi extends ViewRecord
                         
                         TextEntry::make('Kod_Cula')
                             ->state(function ($record) {
+                                
                                 $culaOptions = [
                                     "VA" => "🤷🏻‍♂️ Atas Pagar",
                                     "VB" => "💚 Undi Bulan",
@@ -134,6 +135,19 @@ class TelecallPengundi extends ViewRecord
                                     "VY" => "🙅🏻‍♂️ Enggan respon",
                                     "VZ" => "💆🏻‍♂️ Benci politik"
                                 ];
+                                
+                                // Fetch from cula table via SSDP connection
+                                try {
+                                    $culaFromDb = DB::connection('ssdp')
+                                        ->table('cula')
+                                        ->pluck('Nama_Cula', 'Kod_Cula')
+                                        ->toArray();
+                                    
+                                    // Merge database cula options with defaults
+                                    $culaOptions = array_merge($culaOptions, $culaFromDb);
+                                } catch (\Exception $e) {
+                                    // Fall back to defaults if database query fails
+                                }
                                 
                                 $kodCula = trim($record->Kod_Cula ?? '');
                                 
