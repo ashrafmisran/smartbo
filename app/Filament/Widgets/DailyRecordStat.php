@@ -23,6 +23,7 @@ class DailyRecordStat extends TableWidget
                 $date = $this->selectedDate ?? Carbon::today()->toDateString();
 
                 return CallRecord::query()
+                    ->where('user_id', auth()->id())
                     ->whereDate('created_at', $date)
                     ->selectRaw('MAX(id) as id, kod_cula as vcc_kod_cula, COUNT(*) as total_count')
                     ->groupBy('kod_cula')
