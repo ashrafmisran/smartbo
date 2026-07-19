@@ -22,6 +22,7 @@ use Illuminate\View\Middleware\ShareErrorsFromSession;
 use App\Livewire\StatsOverview;
 use App\Livewire\AccountOverview;
 use App\Livewire\DailyCallRecordsByDunTable;
+use App\Filament\Widgets\DailyRecordStat;
 
 class BoPanelProvider extends PanelProvider
 {
@@ -50,6 +51,7 @@ class BoPanelProvider extends PanelProvider
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->widgets([
                 StatsOverview::class,
+                DailyRecordStat::class,
                 DailyCallRecordsByDunTable::class,
             ])
             ->middleware([
