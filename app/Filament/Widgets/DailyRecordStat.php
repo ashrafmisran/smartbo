@@ -59,7 +59,8 @@ class DailyRecordStat extends TableWidget
                 BulkActionGroup::make([
                     //
                 ]),
-            ]);
+            ])
+            ->defaultSort(null);
     }
 
     protected function getDateOptions(): array
