@@ -60,7 +60,7 @@ class DailyRecordStat extends TableWidget
                     //
                 ]),
             ])
-            ->defaultSort(null);
+            ->paginated(false);
     }
 
     protected function getDateOptions(): array
