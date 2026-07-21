@@ -19,15 +19,16 @@ class DailyRecordStat extends TableWidget
     public function table(Table $table): Table
     {
         return $table
-            ->query(function (): Builder {
+            ->query(CallRecord::query())
+            ->modifyQueryUsing(function (Builder $query): Builder {
                 $date = $this->selectedDate ?? Carbon::today()->toDateString();
 
-                return CallRecord::query()
+                return $query
                     ->where('user_id', auth()->id())
                     ->whereDate('created_at', $date)
                     ->selectRaw('MAX(id) as id, kod_cula as vcc_kod_cula, COUNT(*) as total_count')
                     ->groupBy('kod_cula')
-                    ->orderByDesc('total_count');
+                    ->reorder('total_count', 'desc');
             })
             ->columns([
                 TextColumn::make('vcc_kod_cula')
