@@ -12,12 +12,6 @@ use Filament\Widgets\TableWidget;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Tables\Columns\TextColumn;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Database\Eloquent\Builder;
-use Filament\Tables\Table;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Actions\Action;
-use Filament\Actions\BulkActionGroup;
-use Filament\Forms\Components\Select;
 
 class DailyRecordStat extends TableWidget
 {
