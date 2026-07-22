@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Models\Pengundi;
 
 class CallRecord extends Model
 {
@@ -25,12 +26,8 @@ class CallRecord extends Model
         return $this->belongsTo(User::class);
     }
 
-    // Note: We don't create a relationship to Pengundi since we're using IC as string
-    // but we can add a method to get pengundi data if needed
-    public function getPengundiAttribute()
+    public function pengundi(): BelongsTo
     {
-        return \Illuminate\Support\Facades\DB::table('pengundi')
-            ->where('No_KP_Baru', $this->pengundi_ic)
-            ->first();
+        return $this->belongsTo(Pengundi::class, 'pengundi_ic', 'No_KP_Baru');
     }
 }

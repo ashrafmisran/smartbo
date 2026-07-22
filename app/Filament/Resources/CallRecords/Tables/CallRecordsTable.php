@@ -14,10 +14,13 @@ use Filament\Tables\Columns\Layout\Split;
 use Filament\Tables\Filters\Filter;
 use Filament\Forms\Components\DatePicker;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
 use App\Models\CallRecord;
 
 class CallRecordsTable
 {
+    protected static array $pengundiDetailsCache = [];
+
     public static function configure(Table $table): Table
     {
         return $table
@@ -43,6 +46,18 @@ class CallRecordsTable
                         ->searchable()
                         ->badge()
                         ->sortable(),                    
+                    
+                    TextColumn::make('nama_pengundi')
+                        ->label('Nama')
+                        ->getStateUsing(fn ($record) => $record->pengundi?->Nama ?? ''),
+
+                    TextColumn::make('nama_dun')
+                        ->label('Nama DUN')
+                        ->getStateUsing(fn ($record) => static::getPengundiDetails($record->pengundi_ic)['Nama_DUN'] ?? ''),
+
+                    TextColumn::make('nama_daerah')
+                        ->label('Nama Daerah')
+                        ->getStateUsing(fn ($record) => static::getPengundiDetails($record->pengundi_ic)['Nama_Daerah'] ?? ''),
                     
                     TextColumn::make('kod_cula')
                         ->label('Kod Cula')
@@ -178,7 +193,18 @@ class CallRecordsTable
 
     protected static function getFilteredQuery(): Builder
     {
-        $query = CallRecord::query()->with('user');
+        $query = CallRecord::query()
+            ->select([
+                'id',
+                'user_id',
+                'pengundi_ic',
+                'phone_number',
+                'kod_cula',
+                'notes',
+                'called_at',
+                'created_at',
+            ])
+            ->with('user');
         
         // Apply state-based access control
         if (!auth()->user()?->is_admin) {
@@ -217,6 +243,9 @@ class CallRecordsTable
             'Nama User',
             'IC Pengundi',
             'Nombor Telefon',
+            'Nama',
+            'Nama DUN',
+            'Nama Daerah',
             'Kod Cula',
             'Makna Cula',
             'Catatan',
@@ -227,11 +256,24 @@ class CallRecordsTable
         $csvData[] = $headers;
         
         // Add data rows
+        $pengundiIcs = $records->pluck('pengundi_ic')
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+
+        static::loadPengundiDetails($pengundiIcs);
+
         foreach ($records as $record) {
+            $pengundi = static::getPengundiDetails($record->pengundi_ic);
+
             $csvData[] = [
                 $record->user?->name ?? '',
                 $record->pengundi_ic ?? '',
                 $record->phone_number ?? '',
+                $pengundi['Nama'] ?? '',
+                $pengundi['Nama_DUN'] ?? '',
+                $pengundi['Nama_Daerah'] ?? '',
                 $record->kod_cula ?? '',
                 static::getCulaMeaning($record->kod_cula),
                 $record->notes ?? '',
@@ -248,7 +290,66 @@ class CallRecordsTable
         
         return $csvContent;
     }
-    
+
+    protected static function loadPengundiDetails(array $pengundiIcs): void
+    {
+        $missingIcs = array_diff($pengundiIcs, array_keys(static::$pengundiDetailsCache));
+
+        if (empty($missingIcs)) {
+            return;
+        }
+
+        $rows = DB::connection('ssdp')
+            ->table('daftara')
+            ->whereIn('No_KP_Baru', $missingIcs)
+            ->join('dun', 'daftara.Kod_DUN', '=', 'dun.Kod_DUN')
+            ->join('daerah', function ($join) {
+                $join->on('daftara.Kod_Daerah', '=', 'daerah.Kod_Daerah')
+                     ->on('daftara.Kod_DUN', '=', 'daerah.Kod_DUN');
+            })
+            ->get([
+                'daftara.No_KP_Baru as No_KP_Baru',
+                'daftara.Nama as Nama',
+                'dun.Nama_DUN as Nama_DUN',
+                'daerah.Nama_Daerah as Nama_Daerah',
+            ]);
+
+        foreach ($rows as $pengundi) {
+            static::$pengundiDetailsCache[$pengundi->No_KP_Baru] = [
+                'Nama' => $pengundi->Nama,
+                'Nama_DUN' => $pengundi->Nama_DUN,
+                'Nama_Daerah' => $pengundi->Nama_Daerah,
+            ];
+        }
+
+        foreach ($missingIcs as $ic) {
+            if (! array_key_exists($ic, static::$pengundiDetailsCache)) {
+                static::$pengundiDetailsCache[$ic] = [
+                    'Nama' => '',
+                    'Nama_DUN' => '',
+                    'Nama_Daerah' => '',
+                ];
+            }
+        }
+    }
+
+    protected static function getPengundiDetails(?string $pengundiIc): array
+    {
+        if (! $pengundiIc) {
+            return [
+                'Nama' => '',
+                'Nama_DUN' => '',
+                'Nama_Daerah' => '',
+            ];
+        }
+
+        if (! array_key_exists($pengundiIc, static::$pengundiDetailsCache)) {
+            static::loadPengundiDetails([$pengundiIc]);
+        }
+
+        return static::$pengundiDetailsCache[$pengundiIc];
+    }
+
     protected static function getCulaMeaning($kodCula): string
     {
         return match ($kodCula) {
