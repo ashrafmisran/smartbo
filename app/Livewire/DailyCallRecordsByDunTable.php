@@ -157,8 +157,32 @@ class DailyCallRecordsByDunTable extends TableWidget
 
     protected function getDunList(): array
     {
-        // Remove state filtering - all admins can see all DUNs
+        $cutoffDate = Carbon::now()->subDays(14)->format('Y-m-d H:i:s');
+
+        $pengundiIcs = CallRecord::query()
+            ->whereNotNull('kod_cula')
+            ->where('created_at', '>=', $cutoffDate)
+            ->distinct()
+            ->pluck('pengundi_ic')
+            ->toArray();
+
+        if (empty($pengundiIcs)) {
+            return [];
+        }
+
+        $dunCodes = DB::connection('ssdp')
+            ->table('daftara')
+            ->whereIn('No_KP_Baru', $pengundiIcs)
+            ->distinct()
+            ->pluck('Kod_DUN')
+            ->toArray();
+
+        if (empty($dunCodes)) {
+            return [];
+        }
+
         return Dun::query()
+            ->whereIn('Kod_DUN', $dunCodes)
             ->orderBy('Kod_DUN')
             ->pluck('Nama_DUN', 'Kod_DUN')
             ->toArray();
