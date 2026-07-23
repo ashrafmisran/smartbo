@@ -9,6 +9,7 @@ use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Schemas\Schema;
 use Filament\Widgets\Widget;
+use Illuminate\Support\Facades\DB;
 
 class DailyRecordStat extends Widget implements HasForms
 {
@@ -45,7 +46,7 @@ class DailyRecordStat extends Widget implements HasForms
     {
         $date = $this->data['selectedDate'] ?? $this->selectedDate;
 
-        return CallRecord::query()
+        $records = CallRecord::query()
             ->where('user_id', auth()->id())
             ->whereDate('created_at', $date)
             ->selectRaw('
@@ -55,6 +56,40 @@ class DailyRecordStat extends Widget implements HasForms
             ->groupBy('kod_cula')
             ->orderByDesc('total_count')
             ->get();
+
+        $culaNameMap = $this->getCulaNameMap();
+
+        return $records->map(function ($record) use ($culaNameMap) {
+            $record->nama_cula = $this->getCulaLabel($record->kod_cula, $culaNameMap);
+
+            return $record;
+        });
+    }
+
+    protected function getCulaNameMap(): array
+    {
+        try {
+            return DB::connection('ssdp')
+                ->table('cula')
+                ->pluck('Nama_Cula', 'Kod_Cula')
+                ->mapWithKeys(fn ($name, $code) => [trim((string) $code) => trim((string) $name)])
+                ->toArray();
+        } catch (\Throwable $e) {
+            return [];
+        }
+    }
+
+    public function getCulaLabel(?string $kodCula, ?array $nameMap = null): string
+    {
+        $code = trim((string) ($kodCula ?? ''));
+
+        if ($code === '') {
+            return 'Tiada cula';
+        }
+
+        $nameMap = $nameMap ?? $this->getCulaNameMap();
+
+        return $nameMap[$code] ?? $code;
     }
 
     protected function getDateOptions(): array

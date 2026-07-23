@@ -14,7 +14,7 @@
                     <thead>
                         <tr class="border-b">
                             <th class="text-left py-3">
-                                Kod Cula
+                                Nama Cula
                             </th>
 
                             <th class="text-right py-3">
@@ -29,7 +29,7 @@
                             <tr class="border-b">
 
                                 <td class="py-3">
-                                    {{ $record->kod_cula }}
+                                    {{ $record->nama_cula ?? '-' }}
                                 </td>
 
                                 <td class="text-right py-3">
